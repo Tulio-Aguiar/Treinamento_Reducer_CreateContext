@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>React 19 — Treinamento Avançado de Estado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --react: #61dafb;
+      --context: #a78bfa;
+      --reducer: #34d399;
+      --accent: #f97316;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    .logo {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--react);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+      opacity: 0.8;
+    }
+
+    h1 {
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.15;
+      text-align: center;
+      margin-bottom: 20px;
+      max-width: 700px;
+    }
+
+    h1 span { color: var(--react); }
+
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text2);
+      text-align: center;
+      max-width: 540px;
+      line-height: 1.7;
+      margin-bottom: 60px;
+    }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 800px;
+    }
+
+    .card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px;
+      text-decoration: none;
+      color: var(--text);
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .card.context { border-top: 3px solid var(--context); }
+    .card.context:hover { border-color: var(--context); box-shadow: 0 20px 60px rgba(167,139,250,0.15); }
+
+    .card.reducer { border-top: 3px solid var(--reducer); }
+    .card.reducer:hover { border-color: var(--reducer); box-shadow: 0 20px 60px rgba(52,211,153,0.15); }
+
+    .card-icon {
+      font-size: 2.4rem;
+    }
+
+    .card-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 4px 10px;
+      border-radius: 20px;
+      width: fit-content;
+    }
+
+    .card.context .card-badge { background: rgba(167,139,250,0.15); color: var(--context); }
+    .card.reducer .card-badge { background: rgba(52,211,153,0.15); color: var(--reducer); }
+
+    .card h2 {
+      font-size: 1.4rem;
+      font-weight: 700;
+    }
+
+    .card p {
+      font-size: 0.9rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    .card-topics {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .topic-tag {
+      font-size: 11px;
+      font-family: 'JetBrains Mono', monospace;
+      padding: 4px 10px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text2);
+    }
+
+    .card-cta {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .card.context .card-cta { color: var(--context); }
+    .card.reducer .card-cta { color: var(--reducer); }
+
+    .footer {
+      margin-top: 80px;
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text2);
+      opacity: 0.6;
+    }
+
+    .stack-badge {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      margin-bottom: 48px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--text2);
+    }
+
+    .badge-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    .dot-react { background: var(--react); }
+    .dot-ts { background: #3178c6; }
+    .dot-vite { background: #646cff; }
+  </style>
+</head>
+<body>
+
+  <div class="logo">React 19 · TypeScript · Vite</div>
+
+  <h1>Dominando <span>Estado</span> em React</h1>
+
+  <p class="subtitle">
+    Dois módulos de treinamento construídos para quem está voltando ao ecossistema React depois de um tempo.
+    Exemplos reais, progressão deliberada, sem atalhos.
+  </p>
+
+  <div class="stack-badge">
+    <div class="badge"><span class="badge-dot dot-react"></span> React 19</div>
+    <div class="badge"><span class="badge-dot dot-ts"></span> TypeScript 5.9</div>
+    <div class="badge"><span class="badge-dot dot-vite"></span> Vite 7</div>
+  </div>
+
+  <div class="cards">
+
+    <a class="card context" href="useContext.html">
+      <div class="card-icon">🔮</div>
+      <span class="card-badge">Módulo 01</span>
+      <h2>useContext &amp; createContext</h2>
+      <p>
+        Estado global sem prop drilling. Entenda por que o Context existe,
+        como o React 19 o tornou mais limpo, e quando ele é a escolha certa.
+      </p>
+      <div class="card-topics">
+        <span class="topic-tag">createContext</span>
+        <span class="topic-tag">Provider</span>
+        <span class="topic-tag">useContext</span>
+        <span class="topic-tag">TypeScript types</span>
+        <span class="topic-tag">use() hook</span>
+      </div>
+      <div class="card-cta">Entrar no módulo →</div>
+    </a>
+
+    <a class="card reducer" href="useReducer.html">
+      <div class="card-icon">⚡</div>
+      <span class="card-badge">Módulo 02</span>
+      <h2>useReducer</h2>
+      <p>
+        Estado complexo com lógica previsível. O padrão que Redux popularizou,
+        nativo no React, sem dependências externas.
+      </p>
+      <div class="card-topics">
+        <span class="topic-tag">reducer function</span>
+        <span class="topic-tag">dispatch</span>
+        <span class="topic-tag">action types</span>
+        <span class="topic-tag">immer pattern</span>
+        <span class="topic-tag">context + reducer</span>
+      </div>
+      <div class="card-cta">Entrar no módulo →</div>
+    </a>
+
+  </div>
+
+  <div class="footer">
+    Abra os arquivos .html diretamente no navegador · Copie os exemplos para o seu projeto Vite
+  </div>
+
+</body>
+</html>

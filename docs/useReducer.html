@@ -1,0 +1,2375 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>useReducer — React 19</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --text3: #c9d1d9;
+      --accent: #34d399;
+      --accent-dim: rgba(52,211,153,0.1);
+      --accent-border: rgba(52,211,153,0.3);
+      --react: #61dafb;
+      --purple: #a78bfa;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --sidebar-w: 280px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text2);
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.2s;
+    }
+    .sidebar-back:hover { color: var(--text); }
+
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .sidebar-subtitle {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 3px;
+    }
+
+    .sidebar-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text2);
+      padding: 8px 8px 6px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text2);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.4;
+    }
+
+    .sidebar-link:hover { background: var(--bg3); color: var(--text); }
+    .sidebar-link.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
+
+    .sidebar-link .difficulty {
+      float: right;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .diff-basic { background: rgba(52,211,153,0.15); color: var(--accent); }
+    .diff-medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .diff-inter { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      max-width: 860px;
+      padding: 60px 48px;
+    }
+
+    @media (max-width: 900px) {
+      .sidebar { display: none; }
+      .main { margin-left: 0; padding: 30px 20px; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      margin-bottom: 64px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .module-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 20px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text2);
+      line-height: 1.75;
+      max-width: 600px;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 72px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .section-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* ── PROSE ── */
+    .prose {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--text3);
+    }
+
+    .prose + .prose { margin-top: 16px; }
+
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      padding: 2px 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      display: flex;
+      gap: 12px;
+    }
+
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+
+    .callout.info {
+      background: rgba(97,218,251,0.07);
+      border-left: 3px solid var(--react);
+      color: #93e8fb;
+    }
+
+    .callout.warn {
+      background: rgba(251,191,36,0.07);
+      border-left: 3px solid var(--yellow);
+      color: #fcd34d;
+    }
+
+    .callout.tip {
+      background: rgba(52,211,153,0.07);
+      border-left: 3px solid var(--accent);
+      color: #6ee7b7;
+    }
+
+    .callout.danger {
+      background: rgba(248,113,113,0.07);
+      border-left: 3px solid var(--red);
+      color: #fca5a5;
+    }
+
+    .callout.purple {
+      background: rgba(167,139,250,0.07);
+      border-left: 3px solid var(--purple);
+      color: #c4b5fd;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      margin: 24px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-filename::before {
+      content: '';
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .copy-btn {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover { background: var(--bg); color: var(--text); }
+    .copy-btn.copied { border-color: var(--accent); color: var(--accent); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 20px !important;
+      background: #0d1117 !important;
+      font-size: 0.83rem !important;
+      line-height: 1.7 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code { font-family: 'JetBrains Mono', monospace !important; }
+
+    /* ── ANATOMY BOX ── */
+    .anatomy {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 24px 0;
+    }
+
+    .anatomy-header {
+      padding: 12px 20px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text2);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .anatomy-row {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .anatomy-row:last-child { border-bottom: none; }
+
+    .anatomy-term {
+      padding: 14px 20px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--accent);
+      background: rgba(52,211,153,0.04);
+      border-right: 1px solid var(--border);
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+    }
+
+    .anatomy-def {
+      padding: 14px 20px;
+      font-size: 0.88rem;
+      color: var(--text3);
+      line-height: 1.6;
+    }
+
+    /* ── FLOW DIAGRAM ── */
+    .flow {
+      display: flex;
+      align-items: center;
+      gap: 0;
+      margin: 24px 0;
+      overflow-x: auto;
+      padding: 4px;
+    }
+
+    .flow-node {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 18px;
+      text-align: center;
+      min-width: 110px;
+      flex-shrink: 0;
+    }
+
+    .flow-node-label {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .flow-node-desc {
+      font-size: 11px;
+      color: var(--text2);
+    }
+
+    .flow-node.accent { border-color: var(--accent-border); }
+    .flow-node.accent .flow-node-label { color: var(--accent); }
+
+    .flow-node.react { border-color: rgba(97,218,251,0.3); }
+    .flow-node.react .flow-node-label { color: var(--react); }
+
+    .flow-node.purple { border-color: rgba(167,139,250,0.3); }
+    .flow-node.purple .flow-node-label { color: var(--purple); }
+
+    .flow-node.yellow { border-color: rgba(251,191,36,0.3); }
+    .flow-node.yellow .flow-node-label { color: var(--yellow); }
+
+    .flow-arrow {
+      color: var(--text2);
+      font-size: 18px;
+      padding: 0 4px;
+      flex-shrink: 0;
+    }
+
+    /* ── COMPARISON ── */
+    .compare-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .compare-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .compare-card-header {
+      padding: 12px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .compare-card-body {
+      padding: 14px 16px;
+      font-size: 0.85rem;
+      color: var(--text3);
+      line-height: 1.6;
+    }
+
+    .compare-card-body ul {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .compare-card-body ul li::before {
+      margin-right: 8px;
+    }
+
+    .use-item::before { content: '✓'; color: var(--accent); }
+    .avoid-item::before { content: '→'; color: var(--yellow); }
+
+    /* ── STEP LIST ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 24px 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content { flex: 1; }
+    .step-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .step-desc {
+      font-size: 0.88rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    /* ── EXERCISE ── */
+    .exercise {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 28px 0;
+    }
+
+    .exercise-header {
+      padding: 16px 20px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .exercise-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .badge-basic { background: rgba(52,211,153,0.15); color: var(--accent); }
+    .badge-medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .badge-inter { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    .exercise-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .exercise-body { padding: 20px; }
+
+    .exercise-desc {
+      font-size: 0.9rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .exercise-tasks {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .exercise-tasks li {
+      font-size: 0.88rem;
+      color: var(--text3);
+      display: flex;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .exercise-tasks li::before {
+      content: '→';
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .exercise-workspace {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .workspace-label {
+      font-size: 11px;
+      color: var(--text2);
+      padding: 8px 12px 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .workspace-editor {
+      width: 100%;
+      min-height: 180px;
+      background: transparent;
+      border: none;
+      padding: 8px 12px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      resize: vertical;
+      outline: none;
+      line-height: 1.7;
+    }
+
+    .solution-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 12px;
+    }
+
+    .solution-toggle:hover { background: var(--bg3); color: var(--text); }
+
+    .solution-block { display: none; margin-top: 16px; }
+    .solution-block.open { display: block; }
+
+    /* ── COMPARE TABLE ── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 0.88rem;
+    }
+
+    .compare-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: var(--bg3);
+      color: var(--text2);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text3);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table tr:hover td { background: var(--bg2); }
+
+    .compare-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-size: 0.82rem;
+    }
+
+    .check { color: var(--accent); }
+    .cross { color: var(--red); }
+    .neutral { color: var(--yellow); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── NAV FOOTER ── */
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: var(--accent); }
+    .nav-link.prev { color: var(--purple); }
+    .nav-link.prev:hover { color: var(--purple); opacity: 0.7; }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="sidebar-back">← Início</a>
+    <div class="sidebar-title">⚡ useReducer</div>
+    <div class="sidebar-subtitle">Módulo 02 · React 19 + TypeScript</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Fundamentos</div>
+    <a href="#conceito" class="sidebar-link">O que é um reducer</a>
+    <a href="#anatomia" class="sidebar-link">Anatomia completa</a>
+    <a href="#vs-state" class="sidebar-link">Reducer vs useState</a>
+    <a href="#passo-a-passo" class="sidebar-link">Passo a passo com TypeScript</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Exemplos</div>
+    <a href="#ex-basico" class="sidebar-link">Contador avançado <span class="difficulty diff-basic">básico</span></a>
+    <a href="#ex-medio" class="sidebar-link">Lista de tarefas <span class="difficulty diff-medium">médio</span></a>
+    <a href="#ex-inter" class="sidebar-link">Formulário com validação <span class="difficulty diff-inter">inter</span></a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Avançado</div>
+    <a href="#context-reducer" class="sidebar-link">Context + Reducer</a>
+    <a href="#boas-praticas" class="sidebar-link">Boas práticas</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Exercícios</div>
+    <a href="#ex1" class="sidebar-link">Ex.1 — Semáforo <span class="difficulty diff-basic">básico</span></a>
+    <a href="#ex2" class="sidebar-link">Ex.2 — Carrinho Redux-like <span class="difficulty diff-medium">médio</span></a>
+    <a href="#ex3" class="sidebar-link">Ex.3 — Wizard de cadastro <span class="difficulty diff-inter">inter</span></a>
+  </div>
+</nav>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main class="main">
+
+  <div class="hero" id="topo">
+    <div class="module-tag">⚡ Módulo 02</div>
+    <h1>use<span>Reducer</span></h1>
+    <p>
+      useReducer resolve um problema diferente do useState: quando a lógica
+      de atualização de estado é complexa o suficiente para merecer ser
+      isolada, testada e nomeada. O padrão que Redux popularizou, agora
+      nativo e sem dependências.
+    </p>
+  </div>
+
+  <!-- ═══ SEÇÃO 1: CONCEITO ═══ -->
+  <section class="section" id="conceito">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <h2 class="section-title">O que é um reducer</h2>
+    </div>
+
+    <p class="prose">
+      Um reducer é uma função pura que recebe o estado atual e uma ação,
+      e retorna o novo estado. Pura significa que, para os mesmos inputs,
+      sempre produz o mesmo output — sem efeitos colaterais, sem mutação direta.
+    </p>
+
+    <p class="prose">
+      A assinatura de um reducer é sempre a mesma:
+      <code>(state, action) =&gt; newState</code>. O estado nunca é mutado
+      diretamente — a função retorna um novo objeto. Isso torna as transições
+      de estado previsíveis e auditáveis.
+    </p>
+
+    <div class="flow">
+      <div class="flow-node purple">
+        <div class="flow-node-label">UI</div>
+        <div class="flow-node-desc">componente</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node yellow">
+        <div class="flow-node-label">dispatch</div>
+        <div class="flow-node-desc">envia ação</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node accent">
+        <div class="flow-node-label">reducer</div>
+        <div class="flow-node-desc">calcula novo estado</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node react">
+        <div class="flow-node-label">state</div>
+        <div class="flow-node-desc">atualizado</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node purple">
+        <div class="flow-node-label">UI</div>
+        <div class="flow-node-desc">re-renderiza</div>
+      </div>
+    </div>
+
+    <p class="prose">
+      O fluxo é unidirecional e explícito. Cada mudança de estado tem um nome
+      (o tipo da action) e uma causa documentada. Isso é o que torna o
+      <code>useReducer</code> superior ao <code>useState</code> quando o
+      estado é complexo: a lógica de transição fica centralizada, testável
+      e legível.
+    </p>
+
+    <div class="callout purple">
+      <span class="callout-icon">🧠</span>
+      <div>
+        <strong>Conexão com Redux:</strong> Redux inteiro é construído sobre esse
+        padrão. Se você entender <code>useReducer</code>, você entende Redux.
+        A diferença é que Redux adiciona uma store global, middleware e
+        ferramentas de DevTools por cima. Para estado local ou semi-global,
+        <code>useReducer</code> resolve com muito menos complexidade.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 2: ANATOMIA ═══ -->
+  <section class="section" id="anatomia">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <h2 class="section-title">Anatomia completa</h2>
+    </div>
+
+    <p class="prose">
+      Quatro conceitos formam o vocabulary completo do useReducer.
+      Dominar cada um separadamente é o caminho para usá-los juntos
+      sem confusão.
+    </p>
+
+    <div class="anatomy">
+      <div class="anatomy-header">Glossário do useReducer</div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">state</div>
+        <div class="anatomy-def">
+          O dado atual. Um objeto (ou primitivo) que representa o estado
+          completo daquele pedaço da UI. É sempre imutável — nunca modificado
+          diretamente.
+        </div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">action</div>
+        <div class="anatomy-def">
+          Um objeto que descreve o que aconteceu. Tem um campo <code>type</code>
+          (string que nomeia o evento) e opcionalmente um <code>payload</code>
+          com os dados necessários para a mudança.
+        </div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">dispatch</div>
+        <div class="anatomy-def">
+          Função retornada pelo <code>useReducer</code>. Chame-a com uma action
+          para disparar uma transição de estado. É estável entre renders —
+          não precisa de <code>useCallback</code>.
+        </div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">reducer</div>
+        <div class="anatomy-def">
+          A função pura que recebe <code>(state, action)</code> e retorna
+          o novo estado. Normalmente usa <code>switch</code> no <code>type</code>
+          da action. É definida fora do componente para ser testável e estável.
+        </div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">initialState</div>
+        <div class="anatomy-def">
+          O estado inicial passado como segundo argumento do <code>useReducer</code>.
+          Pode ser um objeto literal ou uma função (terceiro argumento) para
+          inicialização preguiçosa.
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">anatomia-visual.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// ─── 1. TIPOS ───────────────────────────────────────────────
+type State = { count: number }
+
+// União discriminada — TypeScript infere o payload pelo type
+type Action =
+  | { type: 'INCREMENT' }
+  | { type: 'DECREMENT' }
+  | { type: 'RESET' }
+  | { type: 'SET'; payload: number }
+
+// ─── 2. REDUCER (fora do componente!) ───────────────────────
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'INCREMENT':
+      return { count: state.count + 1 }
+    case 'DECREMENT':
+      return { count: state.count - 1 }
+    case 'RESET':
+      return { count: 0 }
+    case 'SET':
+      return { count: action.payload }    // payload só existe neste case
+    default:
+      return state                         // nunca muta, sempre retorna estado
+  }
+}
+
+// ─── 3. USO NO COMPONENTE ────────────────────────────────────
+function Counter() {
+  const [state, dispatch] = useReducer(reducer, { count: 0 })
+  //           ^^^^^^^^
+  //           função que envia actions ao reducer
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;{state.count}&lt;/p&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'INCREMENT' })}&gt;+&lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'DECREMENT' })}&gt;-&lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'RESET' })}&gt;Reset&lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'SET', payload: 10 })}&gt;Ir para 10&lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>
+        <strong>União discriminada:</strong> quando <code>type</code> é
+        <code>'SET'</code>, TypeScript sabe automaticamente que <code>payload</code>
+        existe e é <code>number</code>. Nos outros cases, <code>payload</code>
+        sequer existe no tipo. Isso elimina a necessidade de verificações
+        manuais e erros em tempo de compilação.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 3: REDUCER vs USESTATE ═══ -->
+  <section class="section" id="vs-state">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <h2 class="section-title">Reducer vs useState</h2>
+    </div>
+
+    <p class="prose">
+      Ambos gerenciam estado local. A escolha entre eles depende da
+      complexidade da lógica de atualização e de quantos campos de estado
+      precisam mudar de forma coordenada.
+    </p>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-card-header" style="color: var(--react);">
+          useState
+        </div>
+        <div class="compare-card-body">
+          <ul>
+            <li class="use-item">Estado simples: string, number, boolean</li>
+            <li class="use-item">Atualizações independentes entre si</li>
+            <li class="use-item">Lógica cabe em uma linha</li>
+            <li class="use-item">Poucas transições de estado</li>
+            <li class="avoid-item">Evitar quando 3+ campos mudam juntos</li>
+            <li class="avoid-item">Evitar quando a lógica de update é complexa</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-card-header" style="color: var(--accent);">
+          useReducer
+        </div>
+        <div class="compare-card-body">
+          <ul>
+            <li class="use-item">Estado com múltiplos campos relacionados</li>
+            <li class="use-item">Transições nomeadas e auditáveis</li>
+            <li class="use-item">Lógica complexa ou condicional</li>
+            <li class="use-item">Próximo evento depende do estado atual</li>
+            <li class="use-item">Lógica precisa ser testada isoladamente</li>
+            <li class="avoid-item">Overhead para estado simples</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Situação</th>
+          <th>useState</th>
+          <th>useReducer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>toggle: true/false</td>
+          <td><span class="check">✓ ideal</span></td>
+          <td><span class="neutral">overhead</span></td>
+        </tr>
+        <tr>
+          <td>input de formulário simples</td>
+          <td><span class="check">✓ ideal</span></td>
+          <td><span class="neutral">overhead</span></td>
+        </tr>
+        <tr>
+          <td>Formulário com 5+ campos e validação</td>
+          <td><span class="neutral">5 useState separados</span></td>
+          <td><span class="check">✓ ideal</span></td>
+        </tr>
+        <tr>
+          <td>Lista com CRUD (add, edit, remove)</td>
+          <td><span class="neutral">lógica no componente</span></td>
+          <td><span class="check">✓ ideal</span></td>
+        </tr>
+        <tr>
+          <td>Estado de requisição (loading/data/error)</td>
+          <td><span class="neutral">3 useState relacionados</span></td>
+          <td><span class="check">✓ ideal</span></td>
+        </tr>
+        <tr>
+          <td>Máquina de estados (wizard, stepper)</td>
+          <td><span class="cross">✗ propenso a bugs</span></td>
+          <td><span class="check">✓ ideal</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 4: PASSO A PASSO ═══ -->
+  <section class="section" id="passo-a-passo">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <h2 class="section-title">Passo a passo com TypeScript</h2>
+    </div>
+
+    <p class="prose">
+      O processo de construir um reducer segue sempre a mesma sequência.
+      Definir os tipos antes de escrever a lógica é o que torna o
+      TypeScript útil aqui — os erros aparecem na definição, não em runtime.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Modele o estado com uma interface</div>
+          <div class="step-desc">
+            Agrupe todos os campos relacionados em um único objeto. Isso
+            permite que o reducer substitua múltiplos campos em uma única ação.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">taskReducer.ts — Passo 1</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// Estado: tudo que o componente precisa saber
+interface Task {
+  id: string
+  title: string
+  done: boolean
+}
+
+interface TaskState {
+  tasks: Task[]
+  filter: 'all' | 'active' | 'done'
+  editingId: string | null
+}</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Defina as actions como união discriminada</div>
+          <div class="step-desc">
+            Cada action representa um evento que pode acontecer. O nome deve
+            ser descritivo do que aconteceu, no passado — como um log de eventos.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">taskReducer.ts — Passo 2</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">type TaskAction =
+  | { type: 'TASK_ADDED'; payload: { title: string } }
+  | { type: 'TASK_TOGGLED'; payload: { id: string } }
+  | { type: 'TASK_REMOVED'; payload: { id: string } }
+  | { type: 'TASK_EDIT_STARTED'; payload: { id: string } }
+  | { type: 'TASK_EDIT_SAVED'; payload: { id: string; title: string } }
+  | { type: 'FILTER_CHANGED'; payload: { filter: TaskState['filter'] } }</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Escreva o reducer</div>
+          <div class="step-desc">
+            Cada case retorna um novo objeto de estado. Nunca modifique
+            <code>state</code> diretamente — use spread para copiar e atualizar.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">taskReducer.ts — Passo 3</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">const initialState: TaskState = {
+  tasks: [],
+  filter: 'all',
+  editingId: null,
+}
+
+function taskReducer(state: TaskState, action: TaskAction): TaskState {
+  switch (action.type) {
+
+    case 'TASK_ADDED':
+      return {
+        ...state,
+        tasks: [
+          ...state.tasks,
+          { id: crypto.randomUUID(), title: action.payload.title, done: false },
+        ],
+      }
+
+    case 'TASK_TOGGLED':
+      return {
+        ...state,
+        tasks: state.tasks.map(task =>
+          task.id === action.payload.id
+            ? { ...task, done: !task.done }
+            : task
+        ),
+      }
+
+    case 'TASK_REMOVED':
+      return {
+        ...state,
+        tasks: state.tasks.filter(task => task.id !== action.payload.id),
+      }
+
+    case 'TASK_EDIT_STARTED':
+      return { ...state, editingId: action.payload.id }
+
+    case 'TASK_EDIT_SAVED':
+      return {
+        ...state,
+        editingId: null,
+        tasks: state.tasks.map(task =>
+          task.id === action.payload.id
+            ? { ...task, title: action.payload.title }
+            : task
+        ),
+      }
+
+    case 'FILTER_CHANGED':
+      return { ...state, filter: action.payload.filter }
+
+    default:
+      return state
+  }
+}</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Use no componente</div>
+          <div class="step-desc">
+            O componente fica limpo: apenas rendering e chamadas de dispatch.
+            Toda a lógica de estado vive no reducer.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">TaskList.tsx — Passo 4</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer, useState } from 'react'
+import { taskReducer, initialState } from './taskReducer'
+
+export function TaskList() {
+  const [state, dispatch] = useReducer(taskReducer, initialState)
+  const [newTitle, setNewTitle] = useState('')
+
+  const addTask = () => {
+    if (!newTitle.trim()) return
+    dispatch({ type: 'TASK_ADDED', payload: { title: newTitle.trim() } })
+    setNewTitle('')
+  }
+
+  // Filtragem acontece aqui — é lógica de rendering, não de estado
+  const visibleTasks = state.tasks.filter(task => {
+    if (state.filter === 'active') return !task.done
+    if (state.filter === 'done') return task.done
+    return true
+  })
+
+  return (
+    &lt;div&gt;
+      &lt;input
+        value={newTitle}
+        onChange={e =&gt; setNewTitle(e.target.value)}
+        placeholder="Nova tarefa..."
+      /&gt;
+      &lt;button onClick={addTask}&gt;Adicionar&lt;/button&gt;
+
+      &lt;ul&gt;
+        {visibleTasks.map(task =&gt; (
+          &lt;li key={task.id}&gt;
+            &lt;input
+              type="checkbox"
+              checked={task.done}
+              onChange={() =&gt; dispatch({ type: 'TASK_TOGGLED', payload: { id: task.id } })}
+            /&gt;
+            &lt;span style={{ textDecoration: task.done ? 'line-through' : 'none' }}&gt;
+              {task.title}
+            &lt;/span&gt;
+            &lt;button onClick={() =&gt; dispatch({ type: 'TASK_REMOVED', payload: { id: task.id } })}&gt;
+              ✕
+            &lt;/button&gt;
+          &lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 5: EXEMPLO BÁSICO ═══ -->
+  <section class="section" id="ex-basico">
+    <div class="section-header">
+      <div class="section-number">05</div>
+      <h2 class="section-title">Exemplo 1 — Contador avançado</h2>
+    </div>
+
+    <p class="prose">
+      Um contador com múltiplas operações demonstra o padrão mais simples
+      de useReducer. Observe como o componente não tem nenhuma lógica —
+      apenas rendering e dispatch.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/components/AdvancedCounter.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface CounterState {
+  count: number
+  step: number
+  history: number[]
+}
+
+type CounterAction =
+  | { type: 'INCREMENT' }
+  | { type: 'DECREMENT' }
+  | { type: 'RESET' }
+  | { type: 'SET_STEP'; payload: number }
+  | { type: 'UNDO' }
+
+// ─── Reducer ─────────────────────────────────────────────
+const initialState: CounterState = { count: 0, step: 1, history: [] }
+
+function counterReducer(state: CounterState, action: CounterAction): CounterState {
+  switch (action.type) {
+
+    case 'INCREMENT':
+      return {
+        ...state,
+        count: state.count + state.step,
+        history: [...state.history, state.count],
+      }
+
+    case 'DECREMENT':
+      return {
+        ...state,
+        count: state.count - state.step,
+        history: [...state.history, state.count],
+      }
+
+    case 'RESET':
+      return initialState
+
+    case 'SET_STEP':
+      return { ...state, step: action.payload }
+
+    case 'UNDO':
+      if (state.history.length === 0) return state
+      const previous = state.history[state.history.length - 1]
+      return {
+        ...state,
+        count: previous,
+        history: state.history.slice(0, -1),
+      }
+
+    default:
+      return state
+  }
+}
+
+// ─── Componente ──────────────────────────────────────────
+export function AdvancedCounter() {
+  const [state, dispatch] = useReducer(counterReducer, initialState)
+
+  return (
+    &lt;div&gt;
+      &lt;h2&gt;{state.count}&lt;/h2&gt;
+      &lt;p&gt;Step: {state.step}&lt;/p&gt;
+
+      &lt;button onClick={() =&gt; dispatch({ type: 'DECREMENT' })}&gt;
+        -{state.step}
+      &lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'INCREMENT' })}&gt;
+        +{state.step}
+      &lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'UNDO' })} disabled={state.history.length === 0}&gt;
+        ↩ Desfazer
+      &lt;/button&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'RESET' })}&gt;
+        Reset
+      &lt;/button&gt;
+
+      &lt;label&gt;
+        Step:
+        &lt;input
+          type="number"
+          min={1}
+          value={state.step}
+          onChange={e =&gt; dispatch({ type: 'SET_STEP', payload: Number(e.target.value) })}
+        /&gt;
+      &lt;/label&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 6: EXEMPLO MÉDIO ═══ -->
+  <section class="section" id="ex-medio">
+    <div class="section-header">
+      <div class="section-number">06</div>
+      <h2 class="section-title">Exemplo 2 — Estado de requisição assíncrona</h2>
+    </div>
+
+    <p class="prose">
+      Gerenciar loading, dados e erro com três <code>useState</code>
+      separados é propenso a inconsistências — loading pode ser
+      <code>false</code> enquanto error ainda é o erro anterior.
+      Um reducer com estados nomeados elimina esse problema.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/hooks/useFetch.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer, useEffect } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+// Estado modelado como máquina de estados explícita
+type FetchState&lt;T&gt; =
+  | { status: 'idle' }
+  | { status: 'loading' }
+  | { status: 'success'; data: T }
+  | { status: 'error'; error: string }
+
+type FetchAction&lt;T&gt; =
+  | { type: 'FETCH_STARTED' }
+  | { type: 'FETCH_SUCCESS'; payload: T }
+  | { type: 'FETCH_ERROR'; payload: string }
+  | { type: 'RESET' }
+
+// ─── Reducer ─────────────────────────────────────────────
+function fetchReducer&lt;T&gt;(
+  _state: FetchState&lt;T&gt;,
+  action: FetchAction&lt;T&gt;
+): FetchState&lt;T&gt; {
+  switch (action.type) {
+    case 'FETCH_STARTED':
+      return { status: 'loading' }
+    case 'FETCH_SUCCESS':
+      return { status: 'success', data: action.payload }
+    case 'FETCH_ERROR':
+      return { status: 'error', error: action.payload }
+    case 'RESET':
+      return { status: 'idle' }
+    default:
+      return _state
+  }
+}
+
+// ─── Hook customizado ────────────────────────────────────
+export function useFetch&lt;T&gt;(url: string) {
+  const [state, dispatch] = useReducer(
+    fetchReducer&lt;T&gt;,
+    { status: 'idle' } as FetchState&lt;T&gt;
+  )
+
+  useEffect(() =&gt; {
+    if (!url) return
+
+    dispatch({ type: 'FETCH_STARTED' })
+
+    const controller = new AbortController()
+
+    fetch(url, { signal: controller.signal })
+      .then(res =&gt; {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        return res.json() as Promise&lt;T&gt;
+      })
+      .then(data =&gt; dispatch({ type: 'FETCH_SUCCESS', payload: data }))
+      .catch(err =&gt; {
+        if (err.name === 'AbortError') return
+        dispatch({ type: 'FETCH_ERROR', payload: err.message })
+      })
+
+    return () =&gt; controller.abort()
+  }, [url])
+
+  return state
+}
+
+// ─── Componente que usa o hook ────────────────────────────
+interface Post {
+  id: number
+  title: string
+  body: string
+}
+
+export function PostList() {
+  const state = useFetch&lt;Post[]&gt;('https://jsonplaceholder.typicode.com/posts?_limit=5')
+
+  if (state.status === 'idle') return &lt;p&gt;Aguardando...&lt;/p&gt;
+  if (state.status === 'loading') return &lt;p&gt;Carregando...&lt;/p&gt;
+  if (state.status === 'error') return &lt;p&gt;Erro: {state.error}&lt;/p&gt;
+
+  // TypeScript sabe aqui que state.data existe e é Post[]
+  return (
+    &lt;ul&gt;
+      {state.data.map(post =&gt; (
+        &lt;li key={post.id}&gt;&lt;strong&gt;{post.title}&lt;/strong&gt;&lt;/li&gt;
+      ))}
+    &lt;/ul&gt;
+  )
+}</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>
+        <strong>O poder do narrowing:</strong> quando <code>state.status === 'success'</code>,
+        TypeScript infere automaticamente que <code>state.data</code> existe.
+        Com três <code>useState</code> separados, você precisaria de verificações
+        manuais. A união discriminada faz isso pelo tipo.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 7: EXEMPLO INTERMEDIÁRIO ═══ -->
+  <section class="section" id="ex-inter">
+    <div class="section-header">
+      <div class="section-number">07</div>
+      <h2 class="section-title">Exemplo 3 — Formulário com validação</h2>
+    </div>
+
+    <p class="prose">
+      Formulários são o caso de uso mais comum para useReducer em
+      aplicações reais. Um formulário com validação sincronizada, campos
+      touched e estado de submissão precisa de transições coordenadas
+      que o reducer modela perfeitamente.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/components/SignupForm.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface FormFields {
+  name: string
+  email: string
+  password: string
+}
+
+interface FormErrors {
+  name?: string
+  email?: string
+  password?: string
+}
+
+interface FormState {
+  fields: FormFields
+  errors: FormErrors
+  touched: Record&lt;keyof FormFields, boolean&gt;
+  isSubmitting: boolean
+  isSubmitted: boolean
+}
+
+type FormAction =
+  | { type: 'FIELD_CHANGED'; payload: { field: keyof FormFields; value: string } }
+  | { type: 'FIELD_BLURRED'; payload: { field: keyof FormFields } }
+  | { type: 'SUBMIT_STARTED' }
+  | { type: 'SUBMIT_SUCCESS' }
+  | { type: 'SUBMIT_FAILED'; payload: FormErrors }
+  | { type: 'RESET' }
+
+// ─── Função de validação (pura, testável separadamente) ──
+function validateField(field: keyof FormFields, value: string): string | undefined {
+  switch (field) {
+    case 'name':
+      return value.trim().length &lt; 2 ? 'Nome muito curto' : undefined
+    case 'email':
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) ? undefined : 'Email inválido'
+    case 'password':
+      return value.length &lt; 6 ? 'Mínimo 6 caracteres' : undefined
+  }
+}
+
+// ─── Reducer ─────────────────────────────────────────────
+const initialState: FormState = {
+  fields: { name: '', email: '', password: '' },
+  errors: {},
+  touched: { name: false, email: false, password: false },
+  isSubmitting: false,
+  isSubmitted: false,
+}
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+
+    case 'FIELD_CHANGED': {
+      const { field, value } = action.payload
+      const error = state.touched[field] ? validateField(field, value) : undefined
+      return {
+        ...state,
+        fields: { ...state.fields, [field]: value },
+        errors: { ...state.errors, [field]: error },
+      }
+    }
+
+    case 'FIELD_BLURRED': {
+      const { field } = action.payload
+      const error = validateField(field, state.fields[field])
+      return {
+        ...state,
+        touched: { ...state.touched, [field]: true },
+        errors: { ...state.errors, [field]: error },
+      }
+    }
+
+    case 'SUBMIT_STARTED':
+      // Valida todos os campos ao submeter
+      const allErrors: FormErrors = {}
+      ;(Object.keys(state.fields) as Array&lt;keyof FormFields&gt;).forEach(field =&gt; {
+        const error = validateField(field, state.fields[field])
+        if (error) allErrors[field] = error
+      })
+      return {
+        ...state,
+        errors: allErrors,
+        touched: { name: true, email: true, password: true },
+        isSubmitting: Object.keys(allErrors).length === 0,
+      }
+
+    case 'SUBMIT_SUCCESS':
+      return { ...state, isSubmitting: false, isSubmitted: true }
+
+    case 'SUBMIT_FAILED':
+      return { ...state, isSubmitting: false, errors: action.payload }
+
+    case 'RESET':
+      return initialState
+
+    default:
+      return state
+  }
+}
+
+// ─── Componente ──────────────────────────────────────────
+export function SignupForm() {
+  const [state, dispatch] = useReducer(formReducer, initialState)
+
+  const handleSubmit = async (e: React.FormEvent) =&gt; {
+    e.preventDefault()
+    dispatch({ type: 'SUBMIT_STARTED' })
+
+    // Verificar se há erros antes de prosseguir
+    const hasErrors = Object.values(state.errors).some(Boolean)
+    if (hasErrors) return
+
+    try {
+      await new Promise(res =&gt; setTimeout(res, 1000)) // Simula API
+      dispatch({ type: 'SUBMIT_SUCCESS' })
+    } catch {
+      dispatch({ type: 'SUBMIT_FAILED', payload: { email: 'Email já cadastrado' } })
+    }
+  }
+
+  if (state.isSubmitted) {
+    return (
+      &lt;div&gt;
+        &lt;h2&gt;Cadastro realizado!&lt;/h2&gt;
+        &lt;button onClick={() =&gt; dispatch({ type: 'RESET' })}&gt;Novo cadastro&lt;/button&gt;
+      &lt;/div&gt;
+    )
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      {(['name', 'email', 'password'] as Array&lt;keyof FormFields&gt;).map(field =&gt; (
+        &lt;div key={field}&gt;
+          &lt;input
+            type={field === 'password' ? 'password' : 'text'}
+            placeholder={field}
+            value={state.fields[field]}
+            onChange={e =&gt; dispatch({
+              type: 'FIELD_CHANGED',
+              payload: { field, value: e.target.value }
+            })}
+            onBlur={() =&gt; dispatch({ type: 'FIELD_BLURRED', payload: { field } })}
+          /&gt;
+          {state.touched[field] &amp;&amp; state.errors[field] &amp;&amp; (
+            &lt;span style={{ color: 'red' }}&gt;{state.errors[field]}&lt;/span&gt;
+          )}
+        &lt;/div&gt;
+      ))}
+
+      &lt;button type="submit" disabled={state.isSubmitting}&gt;
+        {state.isSubmitting ? 'Enviando...' : 'Cadastrar'}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 8: CONTEXT + REDUCER ═══ -->
+  <section class="section" id="context-reducer">
+    <div class="section-header">
+      <div class="section-number">08</div>
+      <h2 class="section-title">Context + Reducer — o padrão poderoso</h2>
+    </div>
+
+    <p class="prose">
+      Context distribui dados pela árvore. Reducer gerencia a lógica de
+      transição de estado. Combinados, formam o padrão que cobre 90% dos
+      casos onde você pensaria em usar Redux em um projeto novo.
+    </p>
+
+    <p class="prose">
+      A ideia: o Context expõe o estado atual e a função <code>dispatch</code>.
+      Qualquer componente pode ler o estado e disparar ações — sem passar
+      callbacks por props, sem estados duplicados.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/contexts/TaskContext.tsx — padrão completo</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { createContext, useContext, useReducer } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface Task {
+  id: string
+  title: string
+  done: boolean
+}
+
+interface TaskState {
+  tasks: Task[]
+}
+
+type TaskAction =
+  | { type: 'TASK_ADDED'; payload: string }
+  | { type: 'TASK_TOGGLED'; payload: string }
+  | { type: 'TASK_REMOVED'; payload: string }
+
+// ─── Reducer ─────────────────────────────────────────────
+function taskReducer(state: TaskState, action: TaskAction): TaskState {
+  switch (action.type) {
+    case 'TASK_ADDED':
+      return {
+        tasks: [...state.tasks, {
+          id: crypto.randomUUID(),
+          title: action.payload,
+          done: false
+        }]
+      }
+    case 'TASK_TOGGLED':
+      return {
+        tasks: state.tasks.map(t =&gt;
+          t.id === action.payload ? { ...t, done: !t.done } : t
+        )
+      }
+    case 'TASK_REMOVED':
+      return { tasks: state.tasks.filter(t =&gt; t.id !== action.payload) }
+    default:
+      return state
+  }
+}
+
+// ─── Contextos separados para estado e dispatch ───────────
+// Separar evita que componentes que só despacham re-renderizem
+// quando o estado muda
+const TaskStateContext = createContext&lt;TaskState | null&gt;(null)
+const TaskDispatchContext = createContext&lt;React.Dispatch&lt;TaskAction&gt; | null&gt;(null)
+
+// ─── Provider ────────────────────────────────────────────
+export function TaskProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = useReducer(taskReducer, { tasks: [] })
+
+  return (
+    &lt;TaskStateContext.Provider value={state}&gt;
+      &lt;TaskDispatchContext.Provider value={dispatch}&gt;
+        {children}
+      &lt;/TaskDispatchContext.Provider&gt;
+    &lt;/TaskStateContext.Provider&gt;
+  )
+}
+
+// ─── Hooks públicos ──────────────────────────────────────
+export function useTaskState(): TaskState {
+  const ctx = useContext(TaskStateContext)
+  if (!ctx) throw new Error('useTaskState fora do TaskProvider')
+  return ctx
+}
+
+export function useTaskDispatch(): React.Dispatch&lt;TaskAction&gt; {
+  const ctx = useContext(TaskDispatchContext)
+  if (!ctx) throw new Error('useTaskDispatch fora do TaskProvider')
+  return ctx
+}
+
+// ─── Componentes consumidores ────────────────────────────
+
+// Esse componente só re-renderiza quando o estado muda
+export function TaskCounter() {
+  const { tasks } = useTaskState()
+  const done = tasks.filter(t =&gt; t.done).length
+  return &lt;span&gt;{done}/{tasks.length} concluídas&lt;/span&gt;
+}
+
+// Esse componente nunca re-renderiza por mudança de estado
+// (dispatch é estável — não causa re-render)
+export function AddTaskForm() {
+  const dispatch = useTaskDispatch()
+  const [title, setTitle] = React.useState('')
+
+  const submit = (e: React.FormEvent) =&gt; {
+    e.preventDefault()
+    if (!title.trim()) return
+    dispatch({ type: 'TASK_ADDED', payload: title.trim() })
+    setTitle('')
+  }
+
+  return (
+    &lt;form onSubmit={submit}&gt;
+      &lt;input value={title} onChange={e =&gt; setTitle(e.target.value)} /&gt;
+      &lt;button type="submit"&gt;Adicionar&lt;/button&gt;
+    &lt;/form&gt;
+  )
+}</code></pre>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">🔍</span>
+      <div>
+        <strong>Dois contextos separados:</strong> dividir em <code>StateContext</code>
+        e <code>DispatchContext</code> é uma otimização real. O <code>dispatch</code>
+        do <code>useReducer</code> é sempre estável (mesma referência entre renders),
+        então componentes que só despacham ações nunca re-renderizam por
+        mudança de estado.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 9: BOAS PRÁTICAS ═══ -->
+  <section class="section" id="boas-praticas">
+    <div class="section-header">
+      <div class="section-number">09</div>
+      <h2 class="section-title">Boas práticas</h2>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">✓</span>
+      <div><strong>Reducer fora do componente</strong> — garante que seja estável, testável e não cause re-renders desnecessários.</div>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">✓</span>
+      <div><strong>Nunca mute o estado</strong> — sempre retorne um novo objeto com spread. Mutação direta não dispara re-render e causa bugs silenciosos.</div>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">✓</span>
+      <div><strong>Action types em UPPER_SNAKE_CASE</strong> — convenção universal, facilita leitura de logs e DevTools.</div>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">✓</span>
+      <div><strong>Nome de action no passado</strong> — <code>TASK_ADDED</code>, não <code>ADD_TASK</code>. A action descreve o que aconteceu, não a intenção.</div>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>Nunca dispare efeitos colaterais no reducer</strong> — sem fetch, sem timers, sem <code>localStorage</code>. O reducer é puro. Efeitos ficam em <code>useEffect</code> ou nos handlers dos componentes.</div>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div><strong>Immer para estado muito aninhado</strong> — <code>useImmerReducer</code> (lib immer) permite mutação aparente com resultado imutável. Útil quando o spread fica profundo demais.</div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ EXERCÍCIOS ═══ -->
+  <section class="section" id="exercicios">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <h2 class="section-title">Exercícios</h2>
+    </div>
+
+    <!-- Exercício 1 -->
+    <div class="exercise" id="ex1">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-basic">Básico</span>
+        <span class="exercise-title">Exercício 1 — Semáforo</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Um semáforo é o exemplo clássico de máquina de estados.
+          Tem um estado atual (a cor) e uma transição definida (avançar para
+          a próxima cor). Este exercício força o pensamento em termos de estados
+          discretos e transições nomeadas.
+        </p>
+        <ul class="exercise-tasks">
+          <li>O estado deve ser um objeto com <code>color: 'red' | 'yellow' | 'green'</code></li>
+          <li>Crie uma action <code>NEXT</code> que avança a cor: red → green → yellow → red</li>
+          <li>O componente exibe um círculo colorido e um botão "Avançar"</li>
+          <li><strong>Bônus:</strong> adicione uma action <code>AUTO_TICK</code> e um <code>useEffect</code> com <code>setInterval</code> de 2000ms que faz o semáforo avançar automaticamente</li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// TrafficLight.tsx</div>
+          <textarea class="workspace-editor" placeholder="// type Color = 'red' | 'yellow' | 'green'
+// interface TrafficState { color: Color }
+// type TrafficAction = { type: 'NEXT' }
+//
+// const transitions: Record&lt;Color, Color&gt; = {
+//   red: 'green',
+//   green: 'yellow',
+//   yellow: 'red',
+// }"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">👁 Ver solução</button>
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — TrafficLight.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-typescript">import { useReducer, useEffect } from 'react'
+
+type Color = 'red' | 'yellow' | 'green'
+
+interface TrafficState { color: Color }
+type TrafficAction = { type: 'NEXT' }
+
+// Tabela de transição — explícita e auditável
+const transitions: Record&lt;Color, Color&gt; = {
+  red: 'green',
+  green: 'yellow',
+  yellow: 'red',
+}
+
+const colorMap: Record&lt;Color, string&gt; = {
+  red: '#f87171',
+  yellow: '#fbbf24',
+  green: '#34d399',
+}
+
+const labelMap: Record&lt;Color, string&gt; = {
+  red: '🔴 Pare',
+  yellow: '🟡 Atenção',
+  green: '🟢 Siga',
+}
+
+function trafficReducer(state: TrafficState, action: TrafficAction): TrafficState {
+  switch (action.type) {
+    case 'NEXT':
+      return { color: transitions[state.color] }
+    default:
+      return state
+  }
+}
+
+export function TrafficLight() {
+  const [state, dispatch] = useReducer(trafficReducer, { color: 'red' })
+
+  // Bônus: avanço automático
+  useEffect(() =&gt; {
+    const timer = setInterval(() =&gt; {
+      dispatch({ type: 'NEXT' })
+    }, 2000)
+    return () =&gt; clearInterval(timer)
+  }, []) // dispatch é estável, não precisa de deps
+
+  return (
+    &lt;div style={{ textAlign: 'center' }}&gt;
+      &lt;div style={{
+        width: 80,
+        height: 80,
+        borderRadius: '50%',
+        background: colorMap[state.color],
+        margin: '0 auto 16px',
+        transition: 'background 0.3s',
+      }} /&gt;
+      &lt;p&gt;{labelMap[state.color]}&lt;/p&gt;
+      &lt;button onClick={() =&gt; dispatch({ type: 'NEXT' })}&gt;
+        Avançar
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 2 -->
+    <div class="exercise" id="ex2">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-medium">Médio</span>
+        <span class="exercise-title">Exercício 2 — Carrinho estilo Redux</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Reimplemente o carrinho de compras do módulo de Context usando
+          useReducer. O objetivo é comparar as duas abordagens e sentir
+          quando cada uma é mais adequada.
+        </p>
+        <ul class="exercise-tasks">
+          <li>Modele o estado com <code>items: CartItem[]</code> e <code>isOpen: boolean</code></li>
+          <li>Actions: <code>ITEM_ADDED</code>, <code>ITEM_REMOVED</code>, <code>QUANTITY_CHANGED</code>, <code>CART_CLEARED</code>, <code>CART_TOGGLED</code></li>
+          <li>Calcule <code>totalItems</code> e <code>totalPrice</code> derivados do estado (não no reducer — no componente)</li>
+          <li>O reducer deve lidar com a lógica de incremento quando o item já existe em <code>ITEM_ADDED</code></li>
+          <li><strong>Bônus:</strong> combine com Context para tornar o estado global (padrão Context + Reducer)</li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// cartReducer.ts</div>
+          <textarea class="workspace-editor" placeholder="// interface CartItem { id, name, price, quantity }
+// interface CartState { items: CartItem[], isOpen: boolean }
+// type CartAction = | { type: 'ITEM_ADDED', payload: ... } | ..."></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">👁 Ver solução</button>
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — cartReducer.ts</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-typescript">// ─── Tipos ───────────────────────────────────────────────
+interface CartItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+}
+
+interface CartState {
+  items: CartItem[]
+  isOpen: boolean
+}
+
+type CartAction =
+  | { type: 'ITEM_ADDED'; payload: Omit&lt;CartItem, 'quantity'&gt; }
+  | { type: 'ITEM_REMOVED'; payload: { id: string } }
+  | { type: 'QUANTITY_CHANGED'; payload: { id: string; quantity: number } }
+  | { type: 'CART_CLEARED' }
+  | { type: 'CART_TOGGLED' }
+
+// ─── Estado inicial ──────────────────────────────────────
+export const cartInitialState: CartState = {
+  items: [],
+  isOpen: false,
+}
+
+// ─── Reducer ─────────────────────────────────────────────
+export function cartReducer(state: CartState, action: CartAction): CartState {
+  switch (action.type) {
+
+    case 'ITEM_ADDED': {
+      const exists = state.items.find(i =&gt; i.id === action.payload.id)
+      if (exists) {
+        return {
+          ...state,
+          items: state.items.map(i =&gt;
+            i.id === action.payload.id
+              ? { ...i, quantity: i.quantity + 1 }
+              : i
+          ),
+        }
+      }
+      return {
+        ...state,
+        items: [...state.items, { ...action.payload, quantity: 1 }],
+      }
+    }
+
+    case 'ITEM_REMOVED':
+      return {
+        ...state,
+        items: state.items.filter(i =&gt; i.id !== action.payload.id),
+      }
+
+    case 'QUANTITY_CHANGED':
+      if (action.payload.quantity &lt;= 0) {
+        return {
+          ...state,
+          items: state.items.filter(i =&gt; i.id !== action.payload.id),
+        }
+      }
+      return {
+        ...state,
+        items: state.items.map(i =&gt;
+          i.id === action.payload.id
+            ? { ...i, quantity: action.payload.quantity }
+            : i
+        ),
+      }
+
+    case 'CART_CLEARED':
+      return { ...state, items: [] }
+
+    case 'CART_TOGGLED':
+      return { ...state, isOpen: !state.isOpen }
+
+    default:
+      return state
+  }
+}
+
+// ─── Seletores (valores derivados) ───────────────────────
+// Calculados no componente ou no hook, não no reducer
+export const selectTotalItems = (state: CartState) =&gt;
+  state.items.reduce((sum, i) =&gt; sum + i.quantity, 0)
+
+export const selectTotalPrice = (state: CartState) =&gt;
+  state.items.reduce((sum, i) =&gt; sum + i.price * i.quantity, 0)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 3 -->
+    <div class="exercise" id="ex3">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-inter">Intermediário</span>
+        <span class="exercise-title">Exercício 3 — Wizard de cadastro multi-etapa</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Um wizard (formulário de múltiplas etapas) é uma máquina de estados
+          sofisticada. O reducer gerencia qual etapa está ativa, os dados
+          acumulados de cada etapa e o estado geral do processo.
+          Este é o exercício que mais se aproxima de código de produção.
+        </p>
+        <ul class="exercise-tasks">
+          <li>O wizard tem 3 etapas: <code>personal</code> (nome, email), <code>address</code> (cidade, estado), <code>review</code> (confirmação)</li>
+          <li>O estado guarda a etapa atual, os dados de cada etapa e se o processo foi concluído</li>
+          <li>Actions: <code>STEP_COMPLETED</code> (avança e salva dados), <code>STEP_BACK</code>, <code>WIZARD_SUBMITTED</code>, <code>WIZARD_RESET</code></li>
+          <li>Na etapa <code>review</code>, exibe todos os dados coletados antes da submissão</li>
+          <li><strong>Desafio:</strong> adicione validação por etapa — <code>STEP_COMPLETED</code> só avança se os dados da etapa forem válidos</li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// wizardReducer.ts</div>
+          <textarea class="workspace-editor" placeholder="// type Step = 'personal' | 'address' | 'review'
+//
+// interface WizardState {
+//   currentStep: Step
+//   data: {
+//     personal: { name: string; email: string } | null
+//     address: { city: string; state: string } | null
+//   }
+//   isCompleted: boolean
+// }
+//
+// const stepOrder: Step[] = ['personal', 'address', 'review']"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">👁 Ver solução</button>
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — wizardReducer.ts</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-typescript">// ─── Tipos ───────────────────────────────────────────────
+type Step = 'personal' | 'address' | 'review'
+
+interface PersonalData { name: string; email: string }
+interface AddressData { city: string; state: string }
+
+interface WizardState {
+  currentStep: Step
+  data: {
+    personal: PersonalData | null
+    address: AddressData | null
+  }
+  isCompleted: boolean
+}
+
+type WizardAction =
+  | { type: 'STEP_COMPLETED'; payload: { step: 'personal'; data: PersonalData } }
+  | { type: 'STEP_COMPLETED'; payload: { step: 'address'; data: AddressData } }
+  | { type: 'STEP_BACK' }
+  | { type: 'WIZARD_SUBMITTED' }
+  | { type: 'WIZARD_RESET' }
+
+// ─── Sequência de etapas ─────────────────────────────────
+const stepOrder: Step[] = ['personal', 'address', 'review']
+
+function getNextStep(current: Step): Step {
+  const idx = stepOrder.indexOf(current)
+  return stepOrder[Math.min(idx + 1, stepOrder.length - 1)]
+}
+
+function getPrevStep(current: Step): Step {
+  const idx = stepOrder.indexOf(current)
+  return stepOrder[Math.max(idx - 1, 0)]
+}
+
+// ─── Estado inicial ──────────────────────────────────────
+const initialState: WizardState = {
+  currentStep: 'personal',
+  data: { personal: null, address: null },
+  isCompleted: false,
+}
+
+// ─── Reducer ─────────────────────────────────────────────
+function wizardReducer(state: WizardState, action: WizardAction): WizardState {
+  switch (action.type) {
+
+    case 'STEP_COMPLETED':
+      if (action.payload.step === 'personal') {
+        return {
+          ...state,
+          currentStep: getNextStep(state.currentStep),
+          data: { ...state.data, personal: action.payload.data },
+        }
+      }
+      if (action.payload.step === 'address') {
+        return {
+          ...state,
+          currentStep: getNextStep(state.currentStep),
+          data: { ...state.data, address: action.payload.data },
+        }
+      }
+      return state
+
+    case 'STEP_BACK':
+      return { ...state, currentStep: getPrevStep(state.currentStep) }
+
+    case 'WIZARD_SUBMITTED':
+      return { ...state, isCompleted: true }
+
+    case 'WIZARD_RESET':
+      return initialState
+
+    default:
+      return state
+  }
+}
+
+// ─── Componente Wizard ───────────────────────────────────
+import { useReducer, useState } from 'react'
+
+export function Wizard() {
+  const [state, dispatch] = useReducer(wizardReducer, initialState)
+
+  if (state.isCompleted) {
+    return (
+      &lt;div&gt;
+        &lt;h2&gt;✓ Cadastro concluído!&lt;/h2&gt;
+        &lt;button onClick={() =&gt; dispatch({ type: 'WIZARD_RESET' })}&gt;Recomeçar&lt;/button&gt;
+      &lt;/div&gt;
+    )
+  }
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Etapa: {stepOrder.indexOf(state.currentStep) + 1} de {stepOrder.length}&lt;/p&gt;
+
+      {state.currentStep === 'personal' &amp;&amp; (
+        &lt;PersonalStep
+          onNext={(data) =&gt; dispatch({ type: 'STEP_COMPLETED', payload: { step: 'personal', data } })}
+        /&gt;
+      )}
+
+      {state.currentStep === 'address' &amp;&amp; (
+        &lt;AddressStep
+          onBack={() =&gt; dispatch({ type: 'STEP_BACK' })}
+          onNext={(data) =&gt; dispatch({ type: 'STEP_COMPLETED', payload: { step: 'address', data } })}
+        /&gt;
+      )}
+
+      {state.currentStep === 'review' &amp;&amp; state.data.personal &amp;&amp; state.data.address &amp;&amp; (
+        &lt;ReviewStep
+          personal={state.data.personal}
+          address={state.data.address}
+          onBack={() =&gt; dispatch({ type: 'STEP_BACK' })}
+          onSubmit={() =&gt; dispatch({ type: 'WIZARD_SUBMITTED' })}
+        /&gt;
+      )}
+    &lt;/div&gt;
+  )
+}
+
+// ─── Subcomponentes das etapas ───────────────────────────
+function PersonalStep({ onNext }: { onNext: (d: PersonalData) =&gt; void }) {
+  const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
+  return (
+    &lt;div&gt;
+      &lt;h3&gt;Dados pessoais&lt;/h3&gt;
+      &lt;input placeholder="Nome" value={name} onChange={e =&gt; setName(e.target.value)} /&gt;
+      &lt;input placeholder="Email" value={email} onChange={e =&gt; setEmail(e.target.value)} /&gt;
+      &lt;button onClick={() =&gt; onNext({ name, email })} disabled={!name || !email}&gt;
+        Próximo →
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}
+
+function AddressStep({ onBack, onNext }: { onBack: () =&gt; void; onNext: (d: AddressData) =&gt; void }) {
+  const [city, setCity] = useState('')
+  const [stateVal, setStateVal] = useState('')
+  return (
+    &lt;div&gt;
+      &lt;h3&gt;Endereço&lt;/h3&gt;
+      &lt;input placeholder="Cidade" value={city} onChange={e =&gt; setCity(e.target.value)} /&gt;
+      &lt;input placeholder="Estado" value={stateVal} onChange={e =&gt; setStateVal(e.target.value)} /&gt;
+      &lt;button onClick={onBack}&gt;← Voltar&lt;/button&gt;
+      &lt;button onClick={() =&gt; onNext({ city, state: stateVal })} disabled={!city || !stateVal}&gt;
+        Próximo →
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}
+
+function ReviewStep({ personal, address, onBack, onSubmit }: {
+  personal: PersonalData; address: AddressData;
+  onBack: () =&gt; void; onSubmit: () =&gt; void
+}) {
+  return (
+    &lt;div&gt;
+      &lt;h3&gt;Revisão&lt;/h3&gt;
+      &lt;p&gt;&lt;strong&gt;Nome:&lt;/strong&gt; {personal.name}&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;Email:&lt;/strong&gt; {personal.email}&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;Cidade:&lt;/strong&gt; {address.city}&lt;/p&gt;
+      &lt;p&gt;&lt;strong&gt;Estado:&lt;/strong&gt; {address.state}&lt;/p&gt;
+      &lt;button onClick={onBack}&gt;← Voltar&lt;/button&gt;
+      &lt;button onClick={onSubmit}&gt;✓ Confirmar&lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══ NAV FOOTER ═══ -->
+  <div class="nav-footer">
+    <a href="useContext.html" class="nav-link prev">← Módulo 01: useContext</a>
+    <a href="index.html" class="nav-link">Início</a>
+  </div>
+
+</main>
+
+<script>
+  hljs.highlightAll()
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre')
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copiado'
+      btn.classList.add('copied')
+      setTimeout(() => {
+        btn.textContent = 'Copiar'
+        btn.classList.remove('copied')
+      }, 2000)
+    })
+  }
+
+  function toggleSolution(btn) {
+    const block = btn.nextElementSibling
+    const isOpen = block.classList.contains('open')
+    block.classList.toggle('open')
+    btn.textContent = isOpen ? '👁 Ver solução' : '🙈 Ocultar solução'
+    if (!isOpen) hljs.highlightAll()
+  }
+
+  const links = document.querySelectorAll('.sidebar-link')
+  const sections = document.querySelectorAll('.section')
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'))
+        const id = entry.target.id
+        const link = document.querySelector(`.sidebar-link[href="#${id}"]`)
+        if (link) link.classList.add('active')
+      }
+    })
+  }, { rootMargin: '-40% 0px -55% 0px' })
+
+  sections.forEach(s => observer.observe(s))
+</script>
+</body>
+</html>
