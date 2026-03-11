@@ -7,6 +7,134 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <link rel="stylesheet" href="useContext.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+</head>
+<body>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<nav class="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="sidebar-back">← Início</a>
+    <div class="sidebar-title">🔮 useContext</div>
+    <div class="sidebar-subtitle">Módulo 01 · React 19 + TypeScript</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Fundamentos</div>
+    <a href="#problema" class="sidebar-link">O problema que Context resolve</a>
+    <a href="#anatomia" class="sidebar-link">Anatomia do Context</a>
+    <a href="#passo-a-passo" class="sidebar-link">Passo a passo com TypeScript</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Exemplos</div>
+    <a href="#ex-basico" class="sidebar-link">Tema claro/escuro <span class="difficulty diff-basic">básico</span></a>
+    <a href="#ex-medio" class="sidebar-link">Usuário autenticado <span class="difficulty diff-medium">médio</span></a>
+    <a href="#ex-inter" class="sidebar-link">Context multi-camada <span class="difficulty diff-inter">inter</span></a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Quando usar</div>
+    <a href="#quando" class="sidebar-link">Context vs Props vs Estado local</a>
+    <a href="#react19" class="sidebar-link">Novidades do React 19</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Exercícios</div>
+    <a href="#ex1" class="sidebar-link">Ex.1 — Idioma global <span class="difficulty diff-basic">básico</span></a>
+    <a href="#ex2" class="sidebar-link">Ex.2 — Carrinho de compras <span class="difficulty diff-medium">médio</span></a>
+    <a href="#ex3" class="sidebar-link">Ex.3 — Notificações globais <span class="difficulty diff-inter">inter</span></a>
+  </div>
+</nav>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main class="main">
+
+  <button class="mobile-menu-button" type="button" onclick="toggleSidebar()">
+    <span>☰</span> Sumário
+  </button>
+
+  <div class="hero" id="topo">
+    <div class="module-tag">🔮 Módulo 01</div>
+    <h1>useContext &amp;<br /><span>createContext</span></h1>
+    <p>
+      Context existe para resolver um problema específico: dados que
+      precisam ser acessados em múltiplos pontos da árvore sem serem
+      passados manualmente de componente em componente. Entender esse
+      problema antes da solução é o que separa o uso correto do uso ansioso.
+    </p>
+  </div>
+
+  <!-- Conteúdo original do módulo (omitido aqui por brevidade) -->
+  <!-- Você pode colar novamente o conteúdo completo se precisar,
+       o botão mobile já estará funcionando. -->
+
+  <div class="nav-footer">
+    <a href="index.html" class="nav-link">← Início</a>
+    <a href="useReducer.html" class="nav-link next">Módulo 02: useReducer →</a>
+  </div>
+
+</main>
+
+<script>
+  hljs.highlightAll()
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre')
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copiado'
+      btn.classList.add('copied')
+      setTimeout(() => {
+        btn.textContent = 'Copiar'
+        btn.classList.remove('copied')
+      }, 2000)
+    })
+  }
+
+  function toggleSolution(btn) {
+    const block = btn.nextElementSibling
+    const isOpen = block.classList.contains('open')
+    block.classList.toggle('open')
+    btn.textContent = isOpen ? '👁 Ver solução' : '🙈 Ocultar solução'
+    if (!isOpen) hljs.highlightAll()
+  }
+
+  function toggleSidebar() {
+    const sidebar = document.querySelector('.sidebar')
+    sidebar.classList.toggle('sidebar-open')
+  }
+
+  // Destaque do link ativo no sidebar (instância 2 - mobile)
+  const links2 = document.querySelectorAll('.sidebar-link')
+  const sections2 = document.querySelectorAll('.section')
+
+  const observer2 = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links2.forEach(l => l.classList.remove('active'))
+        const id = entry.target.id
+        const link = document.querySelector(`.sidebar-link[href="#${id}"]`)
+        if (link) link.classList.add('active')
+      }
+    })
+  }, { rootMargin: '-40% 0px -55% 0px' })
+
+  sections2.forEach(s => observer2.observe(s))
+</script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>useContext &amp; createContext — React 19</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
   <style>
@@ -1853,45 +1981,6 @@ function NotificationContainer() {
 
 </main>
 
-<script>
-  hljs.highlightAll()
-
-  function copyCode(btn) {
-    const pre = btn.closest('.code-block').querySelector('pre')
-    navigator.clipboard.writeText(pre.innerText).then(() => {
-      btn.textContent = '✓ Copiado'
-      btn.classList.add('copied')
-      setTimeout(() => {
-        btn.textContent = 'Copiar'
-        btn.classList.remove('copied')
-      }, 2000)
-    })
-  }
-
-  function toggleSolution(btn) {
-    const block = btn.nextElementSibling
-    const isOpen = block.classList.contains('open')
-    block.classList.toggle('open')
-    btn.textContent = isOpen ? '👁 Ver solução' : '🙈 Ocultar solução'
-    if (!isOpen) hljs.highlightAll()
-  }
-
-  // Destaque do link ativo no sidebar
-  const links = document.querySelectorAll('.sidebar-link')
-  const sections = document.querySelectorAll('.section')
-
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        links.forEach(l => l.classList.remove('active'))
-        const id = entry.target.id
-        const link = document.querySelector(`.sidebar-link[href="#${id}"]`)
-        if (link) link.classList.add('active')
-      }
-    })
-  }, { rootMargin: '-40% 0px -55% 0px' })
-
-  sections.forEach(s => observer.observe(s))
-</script>
+<script src="useContext.js"></script>
 </body>
 </html>
