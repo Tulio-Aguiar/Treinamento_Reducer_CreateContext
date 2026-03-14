@@ -1,0 +1,2626 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tailwind CSS — Do Iniciante ao Avançado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/typescript.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --text3: #c9d1d9;
+      --accent: #38bdf8;
+      --accent-dim: rgba(56,189,248,0.1);
+      --accent-border: rgba(56,189,248,0.3);
+      --react: #61dafb;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --sidebar-w: 280px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text2);
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.2s;
+    }
+    .sidebar-back:hover { color: var(--text); }
+
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .sidebar-subtitle {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 3px;
+    }
+
+    .sidebar-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text2);
+      padding: 8px 8px 6px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text2);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.4;
+    }
+
+    .sidebar-link:hover { background: var(--bg3); color: var(--text); }
+    .sidebar-link.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
+
+    .sidebar-link .difficulty {
+      float: right;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .diff-basic { background: rgba(52,211,153,0.15); color: var(--green); }
+    .diff-medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .diff-inter { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      max-width: 860px;
+      padding: 60px 48px;
+    }
+
+    /* ── MOBILE HEADER ── */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 200;
+    }
+
+    .mobile-header-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .mobile-menu-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      cursor: pointer;
+      padding: 6px 10px;
+      font-size: 16px;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+
+    .mobile-menu-btn:hover { background: var(--bg3); color: var(--text); }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+    }
+
+    .sidebar-overlay.open { display: block; }
+
+    @media (max-width: 900px) {
+      .mobile-header { display: flex; }
+      .main { margin-left: 0; padding: 72px 20px 30px; }
+
+      .sidebar {
+        display: flex;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 100;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+    }
+
+    .diagram { overflow-x: auto; }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .table-wrapper .compare-table {
+      margin: 0;
+      border-radius: 0;
+      border: none;
+      min-width: 520px;
+    }
+
+    @media (max-width: 600px) {
+      .section-title { font-size: 1.25rem; }
+      .hero h1 { font-size: 1.8rem; }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      margin-bottom: 64px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .module-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 20px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text2);
+      line-height: 1.75;
+      max-width: 600px;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 72px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .section-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* ── PROSE ── */
+    .prose {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--text3);
+    }
+
+    .prose + .prose { margin-top: 16px; }
+
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      padding: 2px 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      display: flex;
+      gap: 12px;
+    }
+
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+
+    .callout.info {
+      background: rgba(56,189,248,0.07);
+      border-left: 3px solid var(--accent);
+      color: #7dd3fc;
+    }
+
+    .callout.warn {
+      background: rgba(251,191,36,0.07);
+      border-left: 3px solid var(--yellow);
+      color: #fcd34d;
+    }
+
+    .callout.tip {
+      background: rgba(52,211,153,0.07);
+      border-left: 3px solid var(--green);
+      color: #6ee7b7;
+    }
+
+    .callout.danger {
+      background: rgba(248,113,113,0.07);
+      border-left: 3px solid var(--red);
+      color: #fca5a5;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      margin: 24px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-filename::before {
+      content: '';
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .copy-btn {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover { background: var(--bg); color: var(--text); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 20px !important;
+      background: #0d1117 !important;
+      font-size: 0.83rem !important;
+      line-height: 1.7 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code { font-family: 'JetBrains Mono', monospace !important; }
+
+    /* ── ANNOTATION ── */
+    .annotation {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: -8px 0 20px;
+      font-size: 0.88rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .annotation strong { color: var(--accent); }
+
+    /* ── VISUAL DIAGRAM ── */
+    .diagram {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .diagram-tree { color: var(--text2); }
+    .diagram-highlight { color: var(--accent); font-weight: 500; }
+    .diagram-pain { color: var(--red); }
+    .diagram-ok { color: var(--green); }
+
+    /* ── STEP LIST ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 24px 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content { flex: 1; }
+
+    .step-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 0.88rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    /* ── EXERCISE ── */
+    .exercise {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 28px 0;
+    }
+
+    .exercise-header {
+      padding: 16px 20px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .exercise-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .badge-basic { background: rgba(52,211,153,0.15); color: var(--green); }
+    .badge-medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .badge-inter { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    .exercise-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .exercise-body { padding: 20px; }
+
+    .exercise-desc {
+      font-size: 0.9rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .exercise-tasks {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .exercise-tasks li {
+      font-size: 0.88rem;
+      color: var(--text3);
+      display: flex;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .exercise-tasks li::before {
+      content: '\2192';
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .exercise-workspace {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .workspace-label {
+      font-size: 11px;
+      color: var(--text2);
+      padding: 8px 12px 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .workspace-editor {
+      width: 100%;
+      min-height: 180px;
+      background: transparent;
+      border: none;
+      padding: 8px 12px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      resize: vertical;
+      outline: none;
+      line-height: 1.7;
+    }
+
+    .solution-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 12px;
+    }
+
+    .solution-toggle:hover { background: var(--bg3); color: var(--text); }
+
+    .solution-block {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .solution-block.open { display: block; }
+
+    /* ── COMPARISON TABLE ── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 0.88rem;
+    }
+
+    .compare-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: var(--bg3);
+      color: var(--text2);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text3);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table tr:hover td { background: var(--bg2); }
+
+    .compare-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .check { color: var(--green); }
+    .cross { color: var(--red); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── PROGRESS ── */
+    .progress-bar {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 40px;
+    }
+
+    .progress-segment {
+      height: 3px;
+      border-radius: 2px;
+      flex: 1;
+      background: var(--border);
+    }
+
+    .progress-segment.done { background: var(--accent); }
+
+    /* ── NAV FOOTER ── */
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: var(--accent); }
+    .nav-link.next { flex-direction: row-reverse; color: var(--accent); }
+
+    /* ── LEVEL BAND ── */
+    .level-band {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      padding: 4px 14px;
+      border-radius: 20px;
+      margin-bottom: 32px;
+    }
+
+    .level-iniciante { background: rgba(52,211,153,0.12); color: var(--green); border: 1px solid rgba(52,211,153,0.3); }
+    .level-medio { background: rgba(251,191,36,0.12); color: var(--yellow); border: 1px solid rgba(251,191,36,0.3); }
+    .level-avancado { background: rgba(248,113,113,0.12); color: var(--red); border: 1px solid rgba(248,113,113,0.3); }
+
+    /* ── UTILITY GRID ── */
+    .util-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .util-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 14px 16px;
+    }
+
+    .util-card-label {
+      font-size: 11px;
+      color: var(--text2);
+      margin-bottom: 8px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .util-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .util-list li {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.78rem;
+      color: var(--accent);
+    }
+
+    .util-list li span {
+      color: var(--text2);
+      font-size: 0.72rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ MOBILE HEADER ════════════════ -->
+<div class="mobile-header">
+  <span class="mobile-header-title">🌊 Tailwind CSS</span>
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Abrir menu">☰</button>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="sidebar-back">← Início</a>
+    <div class="sidebar-title">🌊 Tailwind CSS</div>
+    <div class="sidebar-subtitle">Módulo 04 · Do iniciante ao avançado</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Iniciante</div>
+    <a href="#o-que-e" class="sidebar-link">O que é Tailwind</a>
+    <a href="#instalacao" class="sidebar-link">Instalação</a>
+    <a href="#fundamentos" class="sidebar-link">Fundamentos</a>
+    <a href="#flexbox-grid" class="sidebar-link">Flexbox &amp; Grid</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Médio</div>
+    <a href="#responsividade" class="sidebar-link">Responsividade</a>
+    <a href="#estados" class="sidebar-link">Estados e variantes</a>
+    <a href="#dark-mode" class="sidebar-link">Dark mode</a>
+    <a href="#apply" class="sidebar-link">@apply</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Avançado</div>
+    <a href="#config-avancado" class="sidebar-link">Config avançado</a>
+    <a href="#arbitrary" class="sidebar-link">Arbitrary values</a>
+    <a href="#react-cva" class="sidebar-link">React + CVA</a>
+    <a href="#performance" class="sidebar-link">Performance</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Exercícios</div>
+    <a href="#ex1" class="sidebar-link">Ex.1 Navbar <span class="difficulty diff-basic">básico</span></a>
+    <a href="#ex2" class="sidebar-link">Ex.2 Card perfil <span class="difficulty diff-medium">médio</span></a>
+    <a href="#ex3" class="sidebar-link">Ex.3 Dashboard CVA <span class="difficulty diff-inter">inter</span></a>
+  </div>
+</nav>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main class="main">
+
+  <div class="hero" id="topo">
+    <div class="module-tag">🌊 Módulo 04</div>
+    <h1>Tailwind CSS —<br /><span>Do Iniciante ao Avançado</span></h1>
+    <p>
+      Tailwind CSS é um framework utility-first que muda fundamentalmente
+      como você escreve CSS. Em vez de inventar nomes de classes semânticas,
+      você compõe estilos diretamente no HTML com classes utilitárias
+      atômicas. O resultado é um fluxo de desenvolvimento mais rápido,
+      um design system consistente e um bundle final muito menor.
+    </p>
+  </div>
+
+  <div class="progress-bar">
+    <div class="progress-segment done"></div>
+    <div class="progress-segment done"></div>
+    <div class="progress-segment done"></div>
+    <div class="progress-segment done"></div>
+    <div class="progress-segment"></div>
+    <div class="progress-segment"></div>
+    <div class="progress-segment"></div>
+    <div class="progress-segment"></div>
+    <div class="progress-segment"></div>
+    <div class="progress-segment"></div>
+    <div class="progress-segment"></div>
+    <div class="progress-segment"></div>
+  </div>
+
+  <!-- ════════════ NÍVEL INICIANTE ════════════ -->
+  <div class="level-band level-iniciante">● Nível Iniciante</div>
+
+  <!-- ═══ SEÇÃO 01: O QUE É TAILWIND ═══ -->
+  <section class="section" id="o-que-e">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <h2 class="section-title">O que é Tailwind e por que usá-lo</h2>
+    </div>
+
+    <p class="prose">
+      Tailwind CSS é um framework CSS <strong>utility-first</strong>: em vez de componentes
+      prontos como Bootstrap, ele fornece classes de baixo nível — cada uma mapeada
+      para uma regra CSS específica — que você combina para construir qualquer design.
+    </p>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Comparação: CSS tradicional vs CSS-in-JS vs Tailwind</h3>
+
+    <div class="table-wrapper">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Abordagem</th>
+          <th>Como funciona</th>
+          <th>Trade-offs</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>CSS tradicional</td>
+          <td>Arquivos .css separados, classes semânticas (`.card`, `.btn`)</td>
+          <td>Naming difícil, conflitos de escopo, crescimento descontrolado</td>
+        </tr>
+        <tr>
+          <td>CSS-in-JS</td>
+          <td>Estilos dentro do componente JS (styled-components, Emotion)</td>
+          <td>Colocação excelente, mas runtime overhead e sintaxe verbosa</td>
+        </tr>
+        <tr>
+          <td>Tailwind</td>
+          <td>Classes utilitárias direto no HTML</td>
+          <td>HTML verboso, mas sem conflitos, sem naming, design system embutido</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Vantagens reais</h3>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-content">
+          <div class="step-title">Sem nomear classes</div>
+          <div class="step-desc">Acabou o tempo perdido inventando <code>.card-header-wrapper-inner</code>. Você descreve visualmente o que quer, direto no elemento.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-content">
+          <div class="step-title">Colocação de estilos (colocation)</div>
+          <div class="step-desc">O estilo vive junto com o markup que ele afeta. Não há mais ida e volta entre arquivos HTML e CSS.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-content">
+          <div class="step-title">Design system embutido</div>
+          <div class="step-desc">Escala de espaçamento, paleta de cores, tipografia e breakpoints consistentes por padrão. Sem "magic numbers".</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">✓</div>
+        <div class="step-content">
+          <div class="step-title">Bundle mínimo em produção</div>
+          <div class="step-desc">O JIT engine escaneia seu código e inclui <em>somente</em> as classes que você realmente usa. CSS final de 5–20 KB é comum.</div>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Desvantagens honestas</h3>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠</span>
+      <div>
+        <strong>HTML verboso:</strong> elementos com muitos estados e variantes podem acumular dezenas de classes.
+        Isso é real e incomoda no início. A solução é extração com componentes (React/Vue) ou <code>@apply</code>.
+        <br/><br/>
+        <strong>Curva de aprendizado:</strong> você precisa memorizar as classes utilitárias. Mas com o plugin
+        Tailwind IntelliSense no VSCode, o autocomplete cobre 90% dos casos em 2 semanas.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 02: INSTALAÇÃO ═══ -->
+  <section class="section" id="instalacao">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <h2 class="section-title">Instalação e configuração</h2>
+    </div>
+
+    <p class="prose">
+      Existem três formas principais de usar Tailwind, com complexidade crescente.
+      Escolha a que se adequa ao seu contexto.
+    </p>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Opção 1 — CDN Play (para experimentar)</h3>
+    <p class="prose">Ideal para protótipos rápidos e aprendizado. Não use em produção — não há tree-shaking.</p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">index.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- Apenas adicione no &lt;head&gt; --&gt;
+&lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;
+
+&lt;!-- Pronto. Todas as classes ficam disponíveis. --&gt;
+&lt;div class="p-4 bg-sky-500 text-white rounded-lg"&gt;
+  Hello Tailwind!
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Opção 2 — npm + Vite (recomendado)</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">npm create vite@latest meu-projeto -- --template react-ts
+cd meu-projeto
+npm install -D tailwindcss @tailwindcss/vite</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">vite.config.ts</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+import tailwindcss from '@tailwindcss/vite'
+
+export default defineConfig({
+  plugins: [
+    react(),
+    tailwindcss(),
+  ],
+})</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/index.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">@import "tailwindcss";</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Opção 3 — tailwind.config.js (CLI clássico)</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">terminal</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">npm install -D tailwindcss
+npx tailwindcss init</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">tailwind.config.js</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    './src/**/*.{html,js,ts,jsx,tsx}',
+    './index.html',
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/input.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">@tailwind base;
+@tailwind components;
+@tailwind utilities;</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>
+        <strong>Instale o plugin VSCode:</strong> "Tailwind CSS IntelliSense" (bradlc.vscode-tailwindcss).
+        Você terá autocomplete de classes, preview de valores e warning de conflitos em tempo real.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 03: FUNDAMENTOS ═══ -->
+  <section class="section" id="fundamentos">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <h2 class="section-title">Fundamentos: spacing, sizing, cores</h2>
+    </div>
+
+    <p class="prose">
+      Tailwind usa um <strong>sistema de escala numérica</strong> onde 1 unidade = 4px.
+      Isso cria consistência automática — se você usa <code>p-4</code> aqui e <code>gap-4</code>
+      ali, ambos têm 16px. Sem magic numbers.
+    </p>
+
+    <div class="diagram">
+      <div class="diagram-tree">
+<span class="diagram-highlight">Escala de espaçamento (1 unidade = 4px)</span>
+
+  p-0  →  0px        p-1  →  4px        p-2  →  8px
+  p-3  →  12px       p-4  →  16px       p-5  →  20px
+  p-6  →  24px       p-8  →  32px       p-10 →  40px
+  p-12 →  48px       p-16 →  64px       p-20 →  80px
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Spacing — padding e margin</h3>
+
+    <div class="util-grid">
+      <div class="util-card">
+        <div class="util-card-label">Padding</div>
+        <ul class="util-list">
+          <li>p-4 <span>→ todos os lados</span></li>
+          <li>px-4 <span>→ horizontal</span></li>
+          <li>py-4 <span>→ vertical</span></li>
+          <li>pt-4 <span>→ top</span></li>
+          <li>pb-4 <span>→ bottom</span></li>
+          <li>pl-4 <span>→ left</span></li>
+          <li>pr-4 <span>→ right</span></li>
+        </ul>
+      </div>
+      <div class="util-card">
+        <div class="util-card-label">Margin</div>
+        <ul class="util-list">
+          <li>m-4 <span>→ todos os lados</span></li>
+          <li>mx-4 <span>→ horizontal</span></li>
+          <li>my-4 <span>→ vertical</span></li>
+          <li>mt-4 <span>→ top</span></li>
+          <li>mb-4 <span>→ bottom</span></li>
+          <li>ml-4 <span>→ left</span></li>
+          <li>mr-4 <span>→ right</span></li>
+        </ul>
+      </div>
+      <div class="util-card">
+        <div class="util-card-label">Sizing</div>
+        <ul class="util-list">
+          <li>w-4 <span>→ 16px</span></li>
+          <li>w-full <span>→ 100%</span></li>
+          <li>w-screen <span>→ 100vw</span></li>
+          <li>w-1/2 <span>→ 50%</span></li>
+          <li>max-w-sm <span>→ 384px</span></li>
+          <li>max-w-lg <span>→ 512px</span></li>
+          <li>h-16 <span>→ 64px</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Cores — escala 50 a 950</h3>
+
+    <p class="prose">
+      Cada cor tem uma escala de 50 (mais claro) a 950 (mais escuro).
+      Use com prefixos <code>bg-</code>, <code>text-</code>, <code>border-</code>.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">cores.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- Background --&gt;
+&lt;div class="bg-sky-500"&gt;...&lt;/div&gt;
+&lt;div class="bg-slate-900"&gt;...&lt;/div&gt;
+
+&lt;!-- Texto --&gt;
+&lt;p class="text-gray-700"&gt;texto escuro&lt;/p&gt;
+&lt;p class="text-white"&gt;texto branco&lt;/p&gt;
+
+&lt;!-- Borda --&gt;
+&lt;div class="border border-sky-300"&gt;...&lt;/div&gt;
+
+&lt;!-- Exemplo: card completo --&gt;
+&lt;div class="bg-white border border-gray-200 rounded-xl p-6 shadow-sm"&gt;
+  &lt;h2 class="text-gray-900 text-lg font-semibold mb-2"&gt;Título&lt;/h2&gt;
+  &lt;p class="text-gray-500 text-sm"&gt;Descrição do card&lt;/p&gt;
+  &lt;button class="mt-4 bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium"&gt;
+    Ação
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="annotation">
+      <strong>Paleta de cores incluída:</strong> slate, gray, zinc, neutral, stone, red, orange, amber,
+      yellow, lime, green, emerald, teal, cyan, sky, blue, indigo, violet, purple, fuchsia, pink, rose.
+      Cada uma com 11 tonalidades (50, 100, 200...900, 950).
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 04: FLEXBOX E GRID ═══ -->
+  <section class="section" id="flexbox-grid">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <h2 class="section-title">Flexbox e Grid com Tailwind</h2>
+    </div>
+
+    <p class="prose">
+      Tailwind mapeia todas as propriedades de Flexbox e CSS Grid em classes utilitárias.
+      Layouts que antes exigiam 10 linhas de CSS ficam em uma única linha de classes.
+    </p>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Flexbox essencial</h3>
+
+    <div class="util-grid">
+      <div class="util-card">
+        <div class="util-card-label">Direção</div>
+        <ul class="util-list">
+          <li>flex <span>→ display: flex</span></li>
+          <li>flex-row <span>→ padrão</span></li>
+          <li>flex-col <span>→ coluna</span></li>
+          <li>flex-wrap <span>→ quebra</span></li>
+        </ul>
+      </div>
+      <div class="util-card">
+        <div class="util-card-label">Alinhamento</div>
+        <ul class="util-list">
+          <li>items-center</li>
+          <li>items-start</li>
+          <li>items-end</li>
+          <li>justify-between</li>
+          <li>justify-center</li>
+          <li>justify-end</li>
+        </ul>
+      </div>
+      <div class="util-card">
+        <div class="util-card-label">Gap</div>
+        <ul class="util-list">
+          <li>gap-4 <span>→ todos</span></li>
+          <li>gap-x-4 <span>→ horizontal</span></li>
+          <li>gap-y-4 <span>→ vertical</span></li>
+          <li>flex-1 <span>→ flex: 1</span></li>
+          <li>flex-none <span>→ não cresce</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">navbar.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;nav class="flex items-center justify-between px-6 py-4 bg-slate-900"&gt;
+  &lt;a href="/" class="text-white font-bold text-lg"&gt;Logo&lt;/a&gt;
+
+  &lt;div class="flex items-center gap-6"&gt;
+    &lt;a href="/about" class="text-slate-300 hover:text-white text-sm"&gt;About&lt;/a&gt;
+    &lt;a href="/docs"  class="text-slate-300 hover:text-white text-sm"&gt;Docs&lt;/a&gt;
+    &lt;button class="bg-sky-500 text-white px-4 py-2 rounded-lg text-sm font-medium"&gt;
+      Get started
+    &lt;/button&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">CSS Grid</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">cards-grid.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- Grid de 3 colunas com gap --&gt;
+&lt;div class="grid grid-cols-3 gap-6"&gt;
+  &lt;div class="bg-white rounded-xl p-6 shadow"&gt;Card 1&lt;/div&gt;
+  &lt;div class="bg-white rounded-xl p-6 shadow"&gt;Card 2&lt;/div&gt;
+  &lt;div class="bg-white rounded-xl p-6 shadow"&gt;Card 3&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Card que ocupa 2 colunas --&gt;
+&lt;div class="grid grid-cols-3 gap-6"&gt;
+  &lt;div class="col-span-2 bg-sky-100 rounded-xl p-6"&gt;Destaque&lt;/div&gt;
+  &lt;div class="bg-white rounded-xl p-6"&gt;Lateral&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Layout com sidebar + conteúdo --&gt;
+&lt;div class="grid grid-cols-[280px_1fr] gap-8 min-h-screen"&gt;
+  &lt;aside class="bg-slate-900 p-6"&gt;Sidebar&lt;/aside&gt;
+  &lt;main class="p-8"&gt;Conteúdo principal&lt;/main&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ</span>
+      <div>
+        <strong>grid-cols-[280px_1fr]</strong> é um exemplo de <em>arbitrary value</em> — você pode passar
+        qualquer valor CSS entre colchetes. Veremos isso em detalhes na seção 10.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ════════════ NÍVEL MÉDIO ════════════ -->
+  <div class="level-band level-medio">● Nível Médio</div>
+
+  <!-- ═══ SEÇÃO 05: RESPONSIVIDADE ═══ -->
+  <section class="section" id="responsividade">
+    <div class="section-header">
+      <div class="section-number">05</div>
+      <h2 class="section-title">Responsividade</h2>
+    </div>
+
+    <p class="prose">
+      Tailwind é <strong>mobile-first</strong>: classes sem prefixo se aplicam a todos os tamanhos.
+      Prefixos de breakpoint significam "a partir desse tamanho em diante".
+    </p>
+
+    <div class="diagram">
+      <div class="diagram-tree">
+<span class="diagram-highlight">Breakpoints padrão (mobile-first)</span>
+
+  sm   →  640px    md   →  768px    lg   →  1024px
+  xl   →  1280px   2xl  →  1536px
+
+<span class="diagram-highlight">Como ler: "mobile first"</span>
+
+  flex-col           →  coluna em todos os tamanhos
+  flex-col md:flex-row  →  coluna no mobile, linha a partir de md
+  hidden md:block    →  oculto no mobile, visível a partir de md
+  text-sm lg:text-xl →  texto pequeno até lg, grande a partir de lg
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">responsivo.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- Layout: coluna no mobile, linha no desktop --&gt;
+&lt;div class="flex flex-col md:flex-row gap-6"&gt;
+  &lt;aside class="w-full md:w-64 bg-slate-100 p-4 rounded-xl"&gt;
+    Sidebar
+  &lt;/aside&gt;
+  &lt;main class="flex-1 bg-white p-6 rounded-xl"&gt;
+    Conteúdo
+  &lt;/main&gt;
+&lt;/div&gt;
+
+&lt;!-- Grid responsivo: 1 col mobile, 2 cols md, 3 cols lg --&gt;
+&lt;div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"&gt;
+  &lt;div class="bg-white rounded-xl p-6 shadow"&gt;Card&lt;/div&gt;
+  &lt;div class="bg-white rounded-xl p-6 shadow"&gt;Card&lt;/div&gt;
+  &lt;div class="bg-white rounded-xl p-6 shadow"&gt;Card&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- Hamburger só no mobile --&gt;
+&lt;button class="md:hidden p-2"&gt;☰&lt;/button&gt;
+&lt;nav class="hidden md:flex gap-6"&gt;
+  &lt;a href="#"&gt;Home&lt;/a&gt;
+  &lt;a href="#"&gt;Sobre&lt;/a&gt;
+&lt;/nav&gt;
+
+&lt;!-- Container centralizado com padding responsivo --&gt;
+&lt;div class="container mx-auto px-4 md:px-6 lg:px-8"&gt;
+  &lt;h1 class="text-2xl md:text-3xl lg:text-4xl font-bold"&gt;
+    Título responsivo
+  &lt;/h1&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠</span>
+      <div>
+        <strong>Armadilha comum:</strong> <code>sm:something</code> não significa "apenas em telas pequenas".
+        Significa "a partir de 640px". Para estilos exclusivos do mobile, use a classe sem prefixo
+        e sobrescreva em telas maiores.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 06: ESTADOS E VARIANTES ═══ -->
+  <section class="section" id="estados">
+    <div class="section-header">
+      <div class="section-number">06</div>
+      <h2 class="section-title">Estados e variantes</h2>
+    </div>
+
+    <p class="prose">
+      Tailwind suporta pseudo-classes e pseudo-elementos como prefixos de classe.
+      Combinados com <code>group</code> e <code>peer</code>, você consegue interatividade
+      sem uma linha de JavaScript.
+    </p>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Estados básicos</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">estados.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- hover, focus, active --&gt;
+&lt;button class="bg-sky-500 hover:bg-sky-600 active:bg-sky-700
+               text-white px-4 py-2 rounded-lg
+               focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2
+               transition-colors"&gt;
+  Clique aqui
+&lt;/button&gt;
+
+&lt;!-- disabled --&gt;
+&lt;button class="bg-sky-500 text-white px-4 py-2 rounded-lg
+               disabled:opacity-50 disabled:cursor-not-allowed"
+        disabled&gt;
+  Indisponível
+&lt;/button&gt;
+
+&lt;!-- checked (checkbox) --&gt;
+&lt;input type="checkbox"
+       class="w-4 h-4 rounded border-gray-300
+              checked:bg-sky-500 checked:border-sky-500
+              focus:ring-sky-500" /&gt;</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">group — estilizar filhos quando o pai está em hover</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">group.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- Adicione "group" no pai, use "group-hover:" nos filhos --&gt;
+&lt;div class="group flex items-center gap-3 p-4 rounded-xl
+            bg-white hover:bg-sky-50 cursor-pointer transition-colors"&gt;
+  &lt;div class="w-10 h-10 rounded-full bg-sky-100
+              group-hover:bg-sky-200 transition-colors"&gt;&lt;/div&gt;
+  &lt;div&gt;
+    &lt;p class="font-medium text-gray-900"&gt;João Silva&lt;/p&gt;
+    &lt;p class="text-sm text-gray-500 group-hover:text-sky-600 transition-colors"&gt;
+      Ver perfil →
+    &lt;/p&gt;
+  &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">peer — float label pattern sem JS</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">peer-float-label.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- peer no input, peer-placeholder-shown: e peer-focus: no label --&gt;
+&lt;div class="relative"&gt;
+  &lt;input
+    id="email"
+    type="email"
+    placeholder=" "
+    class="peer w-full border border-gray-300 rounded-lg px-4 pt-6 pb-2
+           text-gray-900 focus:outline-none focus:border-sky-500"
+  /&gt;
+  &lt;label
+    for="email"
+    class="absolute left-4 top-4 text-gray-400 text-sm
+           transition-all pointer-events-none
+           peer-placeholder-shown:top-4 peer-placeholder-shown:text-sm
+           peer-focus:top-1.5 peer-focus:text-xs peer-focus:text-sky-500
+           peer-not-placeholder-shown:top-1.5 peer-not-placeholder-shown:text-xs"
+  &gt;
+    E-mail
+  &lt;/label&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="annotation">
+      <strong>Como funciona:</strong> <code>peer</code> marca o input como "peer". O label então usa
+      <code>peer-placeholder-shown:</code> (quando o campo está vazio) e <code>peer-focus:</code>
+      (quando focado) para se mover — tudo sem JavaScript.
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 07: DARK MODE ═══ -->
+  <section class="section" id="dark-mode">
+    <div class="section-header">
+      <div class="section-number">07</div>
+      <h2 class="section-title">Dark mode</h2>
+    </div>
+
+    <p class="prose">
+      Tailwind suporta dark mode nativo com o prefixo <code>dark:</code>. Você configura
+      como ele é ativado: via preferência do sistema (<code>media</code>) ou manualmente
+      via classe no elemento raiz (<code>class</code>).
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">tailwind.config.js</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">/** @type {import('tailwindcss').Config} */
+module.exports = {
+  // 'media' usa prefers-color-scheme do OS
+  // 'class' usa a classe .dark no elemento &lt;html&gt;
+  darkMode: 'class',
+  content: ['./src/**/*.{html,js,ts,jsx,tsx}'],
+  theme: { extend: {} },
+  plugins: [],
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">navbar-dark.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;nav class="bg-white dark:bg-slate-900
+            border-b border-gray-200 dark:border-slate-700
+            px-6 py-4"&gt;
+  &lt;div class="flex items-center justify-between"&gt;
+    &lt;span class="text-gray-900 dark:text-white font-bold text-lg"&gt;
+      MyApp
+    &lt;/span&gt;
+
+    &lt;!-- Botão toggle dark mode --&gt;
+    &lt;button onclick="toggleDark()"
+            class="p-2 rounded-lg text-gray-500 dark:text-slate-400
+                   hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"&gt;
+      🌙
+    &lt;/button&gt;
+
+    &lt;div class="flex gap-4"&gt;
+      &lt;a href="#" class="text-gray-600 dark:text-slate-300 hover:text-gray-900
+                         dark:hover:text-white text-sm"&gt;Docs&lt;/a&gt;
+      &lt;a href="#" class="bg-sky-500 hover:bg-sky-600 text-white px-4 py-2
+                         rounded-lg text-sm font-medium transition-colors"&gt;
+        Começar
+      &lt;/a&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;
+
+&lt;script&gt;
+  function toggleDark() {
+    document.documentElement.classList.toggle('dark')
+    // Persistir preferência:
+    const isDark = document.documentElement.classList.contains('dark')
+    localStorage.setItem('theme', isDark ? 'dark' : 'light')
+  }
+
+  // Restaurar ao carregar:
+  if (localStorage.getItem('theme') === 'dark' ||
+      (!localStorage.getItem('theme') &amp;&amp;
+       window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+    document.documentElement.classList.add('dark')
+  }
+&lt;/script&gt;</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>
+        Use <strong>darkMode: 'class'</strong> quando você quer dar controle ao usuário.
+        Use <strong>'media'</strong> quando você quer seguir automaticamente a preferência do sistema
+        sem toggle manual.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 08: @APPLY ═══ -->
+  <section class="section" id="apply">
+    <div class="section-header">
+      <div class="section-number">08</div>
+      <h2 class="section-title">Extração com @apply</h2>
+    </div>
+
+    <p class="prose">
+      <code>@apply</code> permite extrair classes Tailwind em seletores CSS tradicionais.
+      Útil para componentes repetidos ou integração com bibliotecas que controlam o HTML.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/styles/components.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-2
+           px-4 py-2 rounded-lg text-sm font-medium
+           transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2;
+  }
+
+  .btn-primary {
+    @apply bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-500;
+  }
+
+  .btn-secondary {
+    @apply bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500;
+  }
+
+  .btn-danger {
+    @apply bg-red-500 text-white hover:bg-red-600 focus:ring-red-500;
+  }
+
+  /* Uso no HTML: */
+  /* &lt;button class="btn btn-primary"&gt;Salvar&lt;/button&gt; */
+  /* &lt;button class="btn btn-secondary"&gt;Cancelar&lt;/button&gt; */
+}</code></pre>
+    </div>
+
+    <div class="callout danger">
+      <span class="callout-icon">✗</span>
+      <div>
+        <strong>Quando NÃO usar @apply:</strong><br />
+        — Não use para substituir classes utilitárias simples (derrota o propósito)<br />
+        — Não é um substituto para Sass/LESS — não tem variáveis, loops, mixins<br />
+        — Em projetos React/Vue, prefira componentes JS para reuso: você ganha props, lógica e tipagem
+      </div>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Alternativa recomendada: componente React</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">Button.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// Em vez de @apply, crie um componente tipado
+interface ButtonProps extends React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt; {
+  variant?: 'primary' | 'secondary' | 'danger'
+  size?: 'sm' | 'md' | 'lg'
+}
+
+const variants = {
+  primary:   'bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-500',
+  secondary: 'bg-gray-100 text-gray-900 hover:bg-gray-200 focus:ring-gray-500',
+  danger:    'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+}
+
+const sizes = {
+  sm: 'px-3 py-1.5 text-xs',
+  md: 'px-4 py-2 text-sm',
+  lg: 'px-6 py-3 text-base',
+}
+
+export function Button({ variant = 'primary', size = 'md', className = '', ...props }: ButtonProps) {
+  return (
+    &lt;button
+      className={`inline-flex items-center justify-center rounded-lg font-medium
+                  transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2
+                  ${variants[variant]} ${sizes[size]} ${className}`}
+      {...props}
+    /&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ════════════ NÍVEL AVANÇADO ════════════ -->
+  <div class="level-band level-avancado">● Nível Avançado</div>
+
+  <!-- ═══ SEÇÃO 09: CONFIG AVANÇADO ═══ -->
+  <section class="section" id="config-avancado">
+    <div class="section-header">
+      <div class="section-number">09</div>
+      <h2 class="section-title">tailwind.config.js avançado</h2>
+    </div>
+
+    <p class="prose">
+      O arquivo de configuração é onde você personaliza o design system do Tailwind.
+      A diferença crucial é <strong>extend</strong> (adiciona ao padrão) vs substituição direta
+      (sobrescreve tudo).
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">tailwind.config.js — tokens customizados</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">/** @type {import('tailwindcss').Config} */
+module.exports = {
+  darkMode: 'class',
+  content: ['./src/**/*.{html,js,ts,jsx,tsx}'],
+
+  theme: {
+    // ❌ Isso SUBSTITUI os valores padrão (cuidado!)
+    // colors: { brand: '#0ea5e9' }
+
+    extend: {
+      // ✅ Isso ADICIONA aos valores padrão
+      colors: {
+        brand: {
+          50:  '#f0f9ff',
+          100: '#e0f2fe',
+          500: '#0ea5e9',
+          600: '#0284c7',
+          900: '#0c4a6e',
+        },
+        // Cor semântica
+        'surface': 'hsl(var(--surface) / &lt;alpha-value&gt;)',
+      },
+
+      fontFamily: {
+        sans: ['Inter', 'system-ui', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Fira Code', 'monospace'],
+      },
+
+      spacing: {
+        '18': '4.5rem',   // 72px — não existe no padrão
+        '88': '22rem',    // 352px
+        '128': '32rem',   // 512px
+      },
+
+      borderRadius: {
+        '4xl': '2rem',
+      },
+
+      boxShadow: {
+        'glow': '0 0 20px rgba(14, 165, 233, 0.3)',
+        'inner-lg': 'inset 0 2px 8px rgba(0,0,0,0.1)',
+      },
+
+      animation: {
+        'fade-in': 'fadeIn 0.3s ease-in-out',
+        'slide-up': 'slideUp 0.4s ease-out',
+      },
+
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        slideUp: {
+          '0%': { transform: 'translateY(16px)', opacity: '0' },
+          '100%': { transform: 'translateY(0)', opacity: '1' },
+        },
+      },
+    },
+  },
+
+  plugins: [
+    require('@tailwindcss/forms'),       // Reset e estilo de inputs/selects
+    require('@tailwindcss/typography'),  // Prose para conteúdo rich text
+  ],
+}</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Outras opções úteis</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">tailwind.config.js — opções extras</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">module.exports = {
+  // Prefixo para evitar conflito com outros frameworks
+  prefix: 'tw-',
+  // tw-flex, tw-grid, tw-p-4...
+
+  // Forçar especificidade com !important
+  important: '#app',
+  // Ou: important: true (aplica !important em tudo — use com cuidado)
+
+  // Safelist: classes geradas dinamicamente que não aparecem no código
+  safelist: [
+    'bg-red-500',
+    'bg-green-500',
+    { pattern: /bg-(red|green|blue)-(100|500|900)/ },
+  ],
+}</code></pre>
+    </div>
+
+    <div class="annotation">
+      <strong>@tailwindcss/typography</strong> adiciona a classe <code>prose</code> que aplica
+      estilos legíveis a conteúdo HTML arbitrário (markdown renderizado, posts de blog).
+      Ideal para CMSs. <code>@tailwindcss/forms</code> normaliza inputs entre browsers.
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 10: ARBITRARY VALUES ═══ -->
+  <section class="section" id="arbitrary">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <h2 class="section-title">Arbitrary values e variantes</h2>
+    </div>
+
+    <p class="prose">
+      Às vezes você precisa de um valor único que não vale entrar no config.
+      Tailwind permite isso com a sintaxe de colchetes: <code>w-[347px]</code>.
+    </p>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Valores arbitrários</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">arbitrary-values.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- Dimensões exatas --&gt;
+&lt;div class="w-[347px] h-[200px]"&gt;&lt;/div&gt;
+
+&lt;!-- Cores arbitrárias --&gt;
+&lt;div class="bg-[#bada55] text-[#1a1a2e]"&gt;&lt;/div&gt;
+
+&lt;!-- Tipografia --&gt;
+&lt;p class="text-[22px] leading-[1.6]"&gt;Texto custom&lt;/p&gt;
+
+&lt;!-- Gradiente com cor arbitrária --&gt;
+&lt;div class="bg-gradient-to-r from-[#667eea] to-[#764ba2]"&gt;&lt;/div&gt;
+
+&lt;!-- Grid template personalizado --&gt;
+&lt;div class="grid grid-cols-[1fr_2fr_1fr]"&gt;
+  &lt;div&gt;25%&lt;/div&gt;
+  &lt;div&gt;50%&lt;/div&gt;
+  &lt;div&gt;25%&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!-- CSS custom property --&gt;
+&lt;div class="bg-[var(--brand-color)]"&gt;&lt;/div&gt;</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Variantes arbitrárias</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">arbitrary-variants.html</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-html">&lt;!-- Estilizar filhos diretos --&gt;
+&lt;ul class="[&amp;>li]:mt-2 [&amp;>li]:pl-4 [&amp;>li]:border-l-2 [&amp;>li]:border-sky-500"&gt;
+  &lt;li&gt;Item 1&lt;/li&gt;
+  &lt;li&gt;Item 2&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!-- nth-child --&gt;
+&lt;div class="[&amp;:nth-child(odd)]:bg-slate-50"&gt;&lt;/div&gt;
+
+&lt;!-- Modificadores de data attributes --&gt;
+&lt;div data-state="open"
+     class="data-[state=open]:block data-[state=closed]:hidden"&gt;
+  Visível apenas quando open
+&lt;/div&gt;
+
+&lt;!-- group com classe arbitrária --&gt;
+&lt;div class="group is-loading"&gt;
+  &lt;button class="group-[.is-loading]:pointer-events-none group-[.is-loading]:opacity-50"&gt;
+    Carregar
+  &lt;/button&gt;
+&lt;/div&gt;</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠</span>
+      <div>
+        <strong>Use com moderação:</strong> arbitrary values são válidos para casos únicos.
+        Se você usa o mesmo valor em 3+ lugares, adicione ao <code>tailwind.config.js</code>.
+        Isso garante consistência e facilita mudanças globais.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 11: REACT + CVA ═══ -->
+  <section class="section" id="react-cva">
+    <div class="section-header">
+      <div class="section-number">11</div>
+      <h2 class="section-title">Tailwind com React: CVA e clsx</h2>
+    </div>
+
+    <p class="prose">
+      À medida que seus componentes crescem, gerenciar classes condicionais com
+      template strings vira um pesadelo. CVA (class-variance-authority) e clsx
+      resolvem isso com elegância.
+    </p>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">O problema: classes condicionais verbosas</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">Button-sem-cva.tsx (evite isso)</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// ❌ Difícil de manter, sem tipagem de variantes
+function Button({ variant, size, disabled, className }) {
+  return (
+    &lt;button className={`
+      px-4 py-2 rounded-lg font-medium transition-colors
+      ${variant === 'primary' ? 'bg-sky-500 text-white hover:bg-sky-600' : ''}
+      ${variant === 'secondary' ? 'bg-gray-100 text-gray-900 hover:bg-gray-200' : ''}
+      ${variant === 'danger' ? 'bg-red-500 text-white hover:bg-red-600' : ''}
+      ${size === 'sm' ? 'text-xs px-3 py-1.5' : ''}
+      ${size === 'lg' ? 'text-base px-6 py-3' : ''}
+      ${disabled ? 'opacity-50 cursor-not-allowed' : ''}
+      ${className}
+    `}&gt;
+      ...
+    &lt;/button&gt;
+  )
+}</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Solução 1: função cn() com clsx</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">lib/utils.ts</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+// cn() combina classes e resolve conflitos do Tailwind
+// Ex: cn('px-2 py-1', 'px-4') → 'py-1 px-4' (px-4 vence)
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+// Uso:
+// cn('text-gray-500', isActive && 'text-sky-500')
+// cn('bg-red-500', variant === 'blue' && 'bg-blue-500')
+// cn(baseClasses, { 'opacity-50': disabled, 'ring-2': focused })</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">terminal — instalar dependências</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">npm install clsx tailwind-merge
+npm install class-variance-authority</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Solução 2: CVA — variantes tipadas</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">components/Button.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
+
+// Define as variantes com tipos automáticos
+const buttonVariants = cva(
+  // Classes base (sempre aplicadas)
+  'inline-flex items-center justify-center gap-2 rounded-lg font-medium ' +
+  'transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ' +
+  'disabled:opacity-50 disabled:pointer-events-none',
+  {
+    variants: {
+      variant: {
+        default:     'bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-500',
+        destructive: 'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+        outline:     'border border-gray-300 bg-white hover:bg-gray-50 text-gray-900 focus:ring-gray-500',
+        ghost:       'hover:bg-gray-100 text-gray-700 focus:ring-gray-500',
+        link:        'text-sky-500 underline-offset-4 hover:underline',
+      },
+      size: {
+        sm:   'px-3 py-1.5 text-xs h-8',
+        md:   'px-4 py-2 text-sm h-10',
+        lg:   'px-6 py-3 text-base h-12',
+        icon: 'h-10 w-10',
+      },
+    },
+    defaultVariants: {
+      variant: 'default',
+      size: 'md',
+    },
+  }
+)
+
+// O tipo ButtonProps herda as variantes automaticamente
+export interface ButtonProps
+  extends React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt;,
+    VariantProps&lt;typeof buttonVariants&gt; {}
+
+export function Button({ className, variant, size, ...props }: ButtonProps) {
+  return (
+    &lt;button
+      className={cn(buttonVariants({ variant, size }), className)}
+      {...props}
+    /&gt;
+  )
+}
+
+// ─── Uso ──────────────────────────────────────────────────
+// &lt;Button&gt;Padrão&lt;/Button&gt;
+// &lt;Button variant="destructive"&gt;Excluir&lt;/Button&gt;
+// &lt;Button variant="outline" size="lg"&gt;Ver mais&lt;/Button&gt;
+// &lt;Button variant="ghost" size="sm"&gt;Cancelar&lt;/Button&gt;
+// &lt;Button variant="link"&gt;Saiba mais →&lt;/Button&gt;</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>
+        CVA gera os tipos automaticamente a partir das variantes. O TypeScript vai reclamar
+        se você tentar <code>variant="inexistente"</code>. É a forma mais elegante de ter
+        um sistema de design tipado com Tailwind.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ SEÇÃO 12: PERFORMANCE ═══ -->
+  <section class="section" id="performance">
+    <div class="section-header">
+      <div class="section-number">12</div>
+      <h2 class="section-title">Performance: JIT e content config</h2>
+    </div>
+
+    <p class="prose">
+      Tailwind 3+ usa JIT (Just-In-Time) por padrão: em vez de gerar todas as classes
+      possíveis (megabytes), ele escaneia seu código em tempo real e gera apenas o que
+      você realmente usa. O resultado é um CSS final mínimo.
+    </p>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Como JIT funciona</h3>
+
+    <div class="diagram">
+      <div class="diagram-tree">
+<span class="diagram-highlight">Sem JIT (Tailwind 2):</span>  gera ~3MB de CSS com todas as combinações
+<span class="diagram-ok">Com JIT (Tailwind 3+):</span>   escaneia código → inclui só o que existe → ~5-20KB
+
+<span class="diagram-highlight">Processo JIT:</span>
+  1. Tailwind lê o array "content" no config
+  2. Escaneia cada arquivo procurando strings que parecem classes
+  3. Gera CSS apenas para as classes encontradas
+  4. Em dev: modo watch, regera ao salvar
+  5. Em prod: resultado final é tiny
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">tailwind.config.js — content correto</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">module.exports = {
+  content: [
+    // ✅ Inclua TODOS os arquivos que podem conter classes Tailwind
+    './src/**/*.{js,ts,jsx,tsx,html}',
+    './index.html',
+
+    // Bibliotecas de componentes externas
+    './node_modules/@my-lib/components/**/*.{js,ts}',
+
+    // Arquivos de configuração que podem ter classes
+    './src/config/variants.ts',
+  ],
+  // ...
+}</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">Safelist — classes dinâmicas</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">tailwind.config.js — safelist</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-javascript">module.exports = {
+  safelist: [
+    // Classes usadas com dados dinâmicos (ex: da API)
+    'bg-red-500', 'bg-green-500', 'bg-yellow-500',
+
+    // Padrão com regex — inclui toda a família
+    { pattern: /^(bg|text|border)-(red|green|blue|yellow)-(100|500|900)$/ },
+
+    // Com variantes
+    {
+      pattern: /^bg-(red|green|blue)-500$/,
+      variants: ['hover', 'dark', 'md'],
+    },
+  ],
+}</code></pre>
+    </div>
+
+    <h3 style="font-size:1rem;font-weight:600;color:var(--text);margin:24px 0 12px;">O que NÃO fazer</h3>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">perigo.tsx — concatenação dinâmica</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// ❌ ERRADO: Tailwind não consegue detectar essas classes
+// O scanner procura strings literais, não expressões dinâmicas
+function Badge({ color }: { color: string }) {
+  return &lt;span className={`bg-${color}-500`}&gt;...&lt;/span&gt;
+  // bg-red-500, bg-blue-500 etc NUNCA serão incluídas no build
+}
+
+// ✅ CORRETO: mapeamento de strings completas
+const colorMap = {
+  red:    'bg-red-500 text-red-50',
+  blue:   'bg-blue-500 text-blue-50',
+  green:  'bg-green-500 text-green-50',
+  yellow: 'bg-yellow-500 text-yellow-50',
+} as const
+
+type Color = keyof typeof colorMap
+
+function Badge({ color }: { color: Color }) {
+  return &lt;span className={colorMap[color]}&gt;...&lt;/span&gt;
+}</code></pre>
+    </div>
+
+    <div class="callout danger">
+      <span class="callout-icon">⚡</span>
+      <div>
+        <strong>Regra de ouro:</strong> sempre escreva nomes de classes Tailwind completos no código.
+        Nunca construa strings de classe por concatenação. O scanner do JIT procura por strings
+        literais completas — ele não executa o JavaScript.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ════════════ EXERCÍCIOS ════════════ -->
+  <section class="section" id="exercicios">
+    <div class="section-header">
+      <div class="section-number">Ex</div>
+      <h2 class="section-title">Exercícios práticos</h2>
+    </div>
+
+    <p class="prose">
+      Os três exercícios seguem progressão deliberada: do uso puro de classes no HTML
+      até componentes React com CVA, cn() e tipagem completa de variantes.
+    </p>
+
+    <!-- Exercício 1 -->
+    <div class="exercise" id="ex1">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-basic">Básico</span>
+        <span class="exercise-title">Exercício 1 — Navbar responsiva</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Crie uma navbar responsiva usando apenas classes Tailwind no HTML.
+          No mobile deve exibir um hamburger menu, no desktop os links ficam visíveis.
+        </p>
+        <ul class="exercise-tasks">
+          <li>Logo à esquerda, links à direita no desktop (&gt;= md)</li>
+          <li>Hamburger (☰) visível apenas no mobile (&lt; md), links ocultos</li>
+          <li>Background escuro (<code>bg-slate-900</code>), texto branco</li>
+          <li>Hover nos links com transição de cor suave</li>
+          <li>Botão CTA com destaque (bg-sky-500)</li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// Seu código aqui — abra no browser com a CDN do Tailwind</div>
+          <textarea class="workspace-editor" placeholder="&lt;nav class=&quot;...&quot;&gt;
+  &lt;div class=&quot;...&quot;&gt;
+    &lt;!-- Logo --&gt;
+    &lt;!-- Links (hidden no mobile) --&gt;
+    &lt;!-- Hamburger (hidden no desktop) --&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">
+          👁 Ver solução
+        </button>
+
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — navbar-responsiva.html</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+  &lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;
+  &lt;title&gt;Navbar Responsiva&lt;/title&gt;
+&lt;/head&gt;
+&lt;body class="bg-slate-950"&gt;
+
+&lt;nav class="bg-slate-900 border-b border-slate-700"&gt;
+  &lt;div class="max-w-6xl mx-auto px-4"&gt;
+    &lt;div class="flex items-center justify-between h-16"&gt;
+
+      &lt;!-- Logo --&gt;
+      &lt;a href="/" class="text-white font-bold text-xl flex items-center gap-2"&gt;
+        &lt;span class="text-sky-400"&gt;◈&lt;/span&gt; MyApp
+      &lt;/a&gt;
+
+      &lt;!-- Links — ocultos no mobile, visíveis a partir de md --&gt;
+      &lt;div class="hidden md:flex items-center gap-6"&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white text-sm
+                           transition-colors duration-150"&gt;Home&lt;/a&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white text-sm
+                           transition-colors duration-150"&gt;Produto&lt;/a&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white text-sm
+                           transition-colors duration-150"&gt;Preços&lt;/a&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white text-sm
+                           transition-colors duration-150"&gt;Docs&lt;/a&gt;
+        &lt;a href="#"
+           class="bg-sky-500 hover:bg-sky-400 text-white px-4 py-2
+                  rounded-lg text-sm font-medium transition-colors"&gt;
+          Começar grátis
+        &lt;/a&gt;
+      &lt;/div&gt;
+
+      &lt;!-- Hamburger — visível só no mobile --&gt;
+      &lt;button
+        id="menu-btn"
+        onclick="toggleMenu()"
+        class="md:hidden p-2 text-slate-300 hover:text-white
+               hover:bg-slate-800 rounded-lg transition-colors"
+        aria-label="Menu"
+      &gt;
+        &lt;svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"&gt;
+          &lt;path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M4 6h16M4 12h16M4 18h16" /&gt;
+        &lt;/svg&gt;
+      &lt;/button&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Menu mobile — oculto por padrão --&gt;
+    &lt;div id="mobile-menu" class="hidden md:hidden pb-4"&gt;
+      &lt;div class="flex flex-col gap-1"&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white hover:bg-slate-800
+                           px-3 py-2 rounded-lg text-sm transition-colors"&gt;Home&lt;/a&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white hover:bg-slate-800
+                           px-3 py-2 rounded-lg text-sm transition-colors"&gt;Produto&lt;/a&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white hover:bg-slate-800
+                           px-3 py-2 rounded-lg text-sm transition-colors"&gt;Preços&lt;/a&gt;
+        &lt;a href="#" class="text-slate-300 hover:text-white hover:bg-slate-800
+                           px-3 py-2 rounded-lg text-sm transition-colors"&gt;Docs&lt;/a&gt;
+        &lt;div class="pt-2 border-t border-slate-700 mt-2"&gt;
+          &lt;a href="#"
+             class="block bg-sky-500 hover:bg-sky-400 text-white px-4 py-2
+                    rounded-lg text-sm font-medium text-center transition-colors"&gt;
+            Começar grátis
+          &lt;/a&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/nav&gt;
+
+&lt;script&gt;
+  function toggleMenu() {
+    const menu = document.getElementById('mobile-menu')
+    menu.classList.toggle('hidden')
+  }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 2 -->
+    <div class="exercise" id="ex2">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-medium">Médio</span>
+        <span class="exercise-title">Exercício 2 — Card de perfil com dark mode</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Crie um card de perfil de usuário com avatar, nome, bio, tags de skills,
+          hover elaborado e suporte a dark mode togglável via botão.
+        </p>
+        <ul class="exercise-tasks">
+          <li>Avatar redondo com borda colorida, nome e bio abaixo</li>
+          <li>Tags de skills com cores diferentes (skill chips)</li>
+          <li>Hover no card: <code>-translate-y-1</code> e sombra aumentada</li>
+          <li>Botões "Seguir" e "Mensagem" com estados hover e focus visíveis</li>
+          <li>Dark mode togglável com botão — usa classe <code>dark</code> no &lt;html&gt;</li>
+          <li>Classes dark: fundo escuro, texto claro, borda ajustada</li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// profile-card.html — inclua a CDN do Tailwind</div>
+          <textarea class="workspace-editor" placeholder="&lt;div class=&quot;group bg-white dark:bg-slate-800 rounded-2xl p-6
+           border border-gray-200 dark:border-slate-700
+           hover:-translate-y-1 hover:shadow-xl
+           transition-all duration-200&quot;&gt;
+  ...
+&lt;/div&gt;"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">
+          👁 Ver solução
+        </button>
+
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — profile-card.html</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-html">&lt;!DOCTYPE html&gt;
+&lt;html lang="pt-BR"&gt;
+&lt;head&gt;
+  &lt;meta charset="UTF-8" /&gt;
+  &lt;meta name="viewport" content="width=device-width, initial-scale=1.0" /&gt;
+  &lt;script src="https://cdn.tailwindcss.com"&gt;&lt;/script&gt;
+  &lt;script&gt;tailwind.config = { darkMode: 'class' }&lt;/script&gt;
+  &lt;title&gt;Profile Card&lt;/title&gt;
+&lt;/head&gt;
+&lt;body class="min-h-screen bg-gray-100 dark:bg-slate-950
+             flex items-center justify-center p-8 transition-colors"&gt;
+
+  &lt;!-- Botão toggle dark mode --&gt;
+  &lt;button
+    onclick="document.documentElement.classList.toggle('dark')"
+    class="fixed top-4 right-4 p-2 rounded-lg
+           bg-white dark:bg-slate-800
+           border border-gray-200 dark:border-slate-700
+           text-gray-600 dark:text-slate-300
+           hover:bg-gray-50 dark:hover:bg-slate-700
+           transition-colors text-sm font-medium"
+  &gt;
+    🌙 Dark mode
+  &lt;/button&gt;
+
+  &lt;!-- Card de perfil --&gt;
+  &lt;div class="group w-full max-w-sm
+              bg-white dark:bg-slate-800
+              border border-gray-200 dark:border-slate-700
+              rounded-2xl p-6 shadow-sm
+              hover:-translate-y-1 hover:shadow-xl dark:hover:shadow-slate-900/50
+              transition-all duration-200 ease-out cursor-pointer"&gt;
+
+    &lt;!-- Header: avatar + status --&gt;
+    &lt;div class="flex items-start justify-between mb-4"&gt;
+      &lt;div class="relative"&gt;
+        &lt;div class="w-16 h-16 rounded-full
+                    bg-gradient-to-br from-sky-400 to-indigo-500
+                    flex items-center justify-center text-white text-2xl font-bold
+                    ring-4 ring-sky-100 dark:ring-sky-900"&gt;
+          JS
+        &lt;/div&gt;
+        &lt;!-- Indicador online --&gt;
+        &lt;span class="absolute -bottom-0.5 -right-0.5
+                     w-4 h-4 rounded-full bg-green-400
+                     border-2 border-white dark:border-slate-800"&gt;&lt;/span&gt;
+      &lt;/div&gt;
+      &lt;span class="text-xs font-medium px-2.5 py-1 rounded-full
+                   bg-green-50 dark:bg-green-900/30
+                   text-green-700 dark:text-green-400
+                   border border-green-200 dark:border-green-800"&gt;
+        Disponível
+      &lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Info --&gt;
+    &lt;div class="mb-4"&gt;
+      &lt;h2 class="text-lg font-semibold text-gray-900 dark:text-white"&gt;
+        João Silva
+      &lt;/h2&gt;
+      &lt;p class="text-sm text-sky-600 dark:text-sky-400 font-medium"&gt;
+        Full-stack Developer
+      &lt;/p&gt;
+      &lt;p class="text-sm text-gray-500 dark:text-slate-400 mt-2 leading-relaxed"&gt;
+        Apaixonado por React, TypeScript e boas abstrações.
+        Open source enthusiast e mentor de devs juniores.
+      &lt;/p&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Skills --&gt;
+    &lt;div class="flex flex-wrap gap-2 mb-6"&gt;
+      &lt;span class="text-xs px-2.5 py-1 rounded-full
+                   bg-sky-50 dark:bg-sky-900/30 text-sky-700 dark:text-sky-300
+                   border border-sky-200 dark:border-sky-800"&gt;React&lt;/span&gt;
+      &lt;span class="text-xs px-2.5 py-1 rounded-full
+                   bg-violet-50 dark:bg-violet-900/30 text-violet-700 dark:text-violet-300
+                   border border-violet-200 dark:border-violet-800"&gt;TypeScript&lt;/span&gt;
+      &lt;span class="text-xs px-2.5 py-1 rounded-full
+                   bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-300
+                   border border-emerald-200 dark:border-emerald-800"&gt;Node.js&lt;/span&gt;
+      &lt;span class="text-xs px-2.5 py-1 rounded-full
+                   bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300
+                   border border-amber-200 dark:border-amber-800"&gt;Tailwind&lt;/span&gt;
+    &lt;/div&gt;
+
+    &lt;!-- Botões --&gt;
+    &lt;div class="flex gap-3"&gt;
+      &lt;button class="flex-1 bg-sky-500 hover:bg-sky-600 active:bg-sky-700
+                     text-white text-sm font-medium py-2 rounded-xl
+                     focus:outline-none focus:ring-2 focus:ring-sky-500 focus:ring-offset-2
+                     dark:focus:ring-offset-slate-800
+                     transition-colors"&gt;
+        Seguir
+      &lt;/button&gt;
+      &lt;button class="flex-1 bg-gray-100 hover:bg-gray-200 active:bg-gray-300
+                     dark:bg-slate-700 dark:hover:bg-slate-600 dark:active:bg-slate-500
+                     text-gray-700 dark:text-slate-200
+                     text-sm font-medium py-2 rounded-xl
+                     focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2
+                     dark:focus:ring-offset-slate-800
+                     transition-colors"&gt;
+        Mensagem
+      &lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+
+&lt;/body&gt;
+&lt;/html&gt;</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 3 -->
+    <div class="exercise" id="ex3">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-inter">Intermediário</span>
+        <span class="exercise-title">Exercício 3 — Dashboard de métricas com CVA</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Construa um dashboard de métricas com grid responsivo, componente Button
+          com CVA e variantes tipadas, uso de group/peer para interatividade, e função cn().
+        </p>
+        <ul class="exercise-tasks">
+          <li>Grid de 4 cards de métricas: 1 col mobile, 2 cols md, 4 cols xl</li>
+          <li>Componente <code>Button</code> com CVA: variants primary, secondary, danger, ghost</li>
+          <li>Função <code>cn()</code> com clsx + tailwind-merge</li>
+          <li>Componente <code>MetricCard</code> com <code>group-hover</code> para revelar ação</li>
+          <li>Toggle de dark mode com <code>peer</code> (checkbox + label)</li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// dashboard.tsx — React + TypeScript</div>
+          <textarea class="workspace-editor" placeholder="// Comece pelas dependências:
+// npm install clsx tailwind-merge class-variance-authority
+//
+// Depois:
+// 1. Função cn() em lib/utils.ts
+// 2. buttonVariants com cva()
+// 3. MetricCard com group-hover
+// 4. Grid responsivo"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">
+          👁 Ver solução
+        </button>
+
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — Dashboard.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-typescript">// ─── lib/utils.ts ────────────────────────────────────────
+import { clsx, type ClassValue } from 'clsx'
+import { twMerge } from 'tailwind-merge'
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+// ─── components/Button.tsx ───────────────────────────────
+import { cva, type VariantProps } from 'class-variance-authority'
+import { cn } from '@/lib/utils'
+
+const buttonVariants = cva(
+  'inline-flex items-center justify-center gap-2 rounded-lg font-medium ' +
+  'transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 ' +
+  'disabled:opacity-50 disabled:pointer-events-none text-sm',
+  {
+    variants: {
+      variant: {
+        primary:   'bg-sky-500 text-white hover:bg-sky-600 focus:ring-sky-500',
+        secondary: 'bg-gray-100 dark:bg-slate-700 text-gray-900 dark:text-slate-100 ' +
+                   'hover:bg-gray-200 dark:hover:bg-slate-600 focus:ring-gray-400',
+        danger:    'bg-red-500 text-white hover:bg-red-600 focus:ring-red-500',
+        ghost:     'text-gray-600 dark:text-slate-400 hover:bg-gray-100 ' +
+                   'dark:hover:bg-slate-800 focus:ring-gray-400',
+      },
+      size: {
+        sm: 'px-3 py-1.5 h-8 text-xs',
+        md: 'px-4 py-2 h-10',
+        lg: 'px-6 py-3 h-12 text-base',
+      },
+    },
+    defaultVariants: { variant: 'primary', size: 'md' },
+  }
+)
+
+interface ButtonProps
+  extends React.ButtonHTMLAttributes&lt;HTMLButtonElement&gt;,
+    VariantProps&lt;typeof buttonVariants&gt; {}
+
+function Button({ variant, size, className, ...props }: ButtonProps) {
+  return (
+    &lt;button className={cn(buttonVariants({ variant, size }), className)} {...props} /&gt;
+  )
+}
+
+// ─── components/MetricCard.tsx ───────────────────────────
+interface MetricCardProps {
+  title: string
+  value: string
+  change: string
+  positive: boolean
+  icon: string
+}
+
+function MetricCard({ title, value, change, positive, icon }: MetricCardProps) {
+  return (
+    &lt;div className="group relative bg-white dark:bg-slate-800
+                    border border-gray-200 dark:border-slate-700
+                    rounded-2xl p-6 shadow-sm
+                    hover:shadow-md hover:-translate-y-0.5
+                    transition-all duration-200"&gt;
+      {/* Ação oculta — aparece no hover via group */}
+      &lt;button className="absolute top-3 right-3 opacity-0 group-hover:opacity-100
+                         transition-opacity p-1.5 rounded-lg
+                         text-gray-400 hover:text-gray-600
+                         hover:bg-gray-100 dark:hover:bg-slate-700"&gt;
+        ⋯
+      &lt;/button&gt;
+
+      &lt;div className="flex items-start justify-between mb-4"&gt;
+        &lt;div className="text-2xl"&gt;{icon}&lt;/div&gt;
+        &lt;span className={cn(
+          'text-xs font-medium px-2 py-1 rounded-full',
+          positive
+            ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-400'
+            : 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-400'
+        )}&gt;
+          {positive ? '↑' : '↓'} {change}
+        &lt;/span&gt;
+      &lt;/div&gt;
+
+      &lt;div&gt;
+        &lt;p className="text-sm text-gray-500 dark:text-slate-400 mb-1"&gt;{title}&lt;/p&gt;
+        &lt;p className="text-2xl font-bold text-gray-900 dark:text-white"&gt;{value}&lt;/p&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}
+
+// ─── Dashboard.tsx ───────────────────────────────────────
+import { useState } from 'react'
+
+const metrics = [
+  { title: 'Receita total',   value: 'R$ 47.2k', change: '12%', positive: true,  icon: '💰' },
+  { title: 'Usuários ativos', value: '2.481',    change: '8%',  positive: true,  icon: '👥' },
+  { title: 'Taxa conversão',  value: '3.24%',    change: '0.5%',positive: false, icon: '📊' },
+  { title: 'Tickets abertos', value: '18',       change: '3',   positive: false, icon: '🎫' },
+]
+
+export default function Dashboard() {
+  const [isDark, setIsDark] = useState(false)
+
+  const toggleDark = () => {
+    setIsDark(prev => {
+      const next = !prev
+      document.documentElement.classList.toggle('dark', next)
+      return next
+    })
+  }
+
+  return (
+    &lt;div className="min-h-screen bg-gray-50 dark:bg-slate-950 transition-colors p-8"&gt;
+
+      {/* Header */}
+      &lt;div className="flex items-center justify-between mb-8"&gt;
+        &lt;div&gt;
+          &lt;h1 className="text-2xl font-bold text-gray-900 dark:text-white"&gt;Dashboard&lt;/h1&gt;
+          &lt;p className="text-sm text-gray-500 dark:text-slate-400"&gt;Visão geral do mês&lt;/p&gt;
+        &lt;/div&gt;
+
+        &lt;div className="flex items-center gap-3"&gt;
+          {/* Toggle dark mode com peer */}
+          &lt;label className="flex items-center gap-2 cursor-pointer"&gt;
+            &lt;input
+              type="checkbox"
+              checked={isDark}
+              onChange={toggleDark}
+              className="peer sr-only"
+            /&gt;
+            &lt;div className="relative w-10 h-6 bg-gray-200 dark:bg-slate-600 rounded-full
+                            peer-checked:bg-sky-500 transition-colors"&gt;
+              &lt;div className="absolute top-1 left-1 w-4 h-4 bg-white rounded-full
+                              peer-checked:translate-x-4 transition-transform
+                              shadow-sm"&gt;&lt;/div&gt;
+            &lt;/div&gt;
+            &lt;span className="text-sm text-gray-600 dark:text-slate-400"&gt;Dark&lt;/span&gt;
+          &lt;/label&gt;
+
+          &lt;Button variant="secondary" size="sm"&gt;Exportar&lt;/Button&gt;
+          &lt;Button variant="primary"&gt;+ Novo relatório&lt;/Button&gt;
+        &lt;/div&gt;
+      &lt;/div&gt;
+
+      {/* Grid de métricas */}
+      &lt;div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-8"&gt;
+        {metrics.map(m =&gt; (
+          &lt;MetricCard key={m.title} {...m} /&gt;
+        ))}
+      &lt;/div&gt;
+
+      {/* Ações de exemplo */}
+      &lt;div className="flex flex-wrap gap-3"&gt;
+        &lt;Button variant="primary"&gt;Salvar&lt;/Button&gt;
+        &lt;Button variant="secondary"&gt;Cancelar&lt;/Button&gt;
+        &lt;Button variant="ghost"&gt;Ver detalhes&lt;/Button&gt;
+        &lt;Button variant="danger"&gt;Excluir&lt;/Button&gt;
+        &lt;Button variant="primary" size="sm"&gt;Sm&lt;/Button&gt;
+        &lt;Button variant="primary" size="lg"&gt;Lg&lt;/Button&gt;
+        &lt;Button variant="primary" disabled&gt;Desabilitado&lt;/Button&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══ NAV FOOTER ═══ -->
+  <div class="nav-footer">
+    <a href="css-moderno.html" class="nav-link">← CSS Moderno</a>
+  </div>
+
+</main>
+
+<script>
+  hljs.highlightAll()
+
+  function toggleMobileMenu() {
+    document.getElementById('sidebar').classList.toggle('open')
+    document.getElementById('sidebar-overlay').classList.toggle('open')
+  }
+
+  function closeMobileMenu() {
+    document.getElementById('sidebar').classList.remove('open')
+    document.getElementById('sidebar-overlay').classList.remove('open')
+  }
+
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) closeMobileMenu()
+    })
+  })
+
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre')
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copiado'
+      btn.classList.add('copied')
+      setTimeout(() => {
+        btn.textContent = 'Copiar'
+        btn.classList.remove('copied')
+      }, 2000)
+    })
+  }
+
+  function toggleSolution(btn) {
+    const block = btn.nextElementSibling
+    const isOpen = block.classList.contains('open')
+    block.classList.toggle('open')
+    btn.textContent = isOpen ? '👁 Ver solução' : '🙈 Ocultar solução'
+    if (!isOpen) hljs.highlightAll()
+  }
+
+  // Destaque do link ativo no sidebar
+  const links = document.querySelectorAll('.sidebar-link')
+  const sections = document.querySelectorAll('.section')
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'))
+        const id = entry.target.id
+        const link = document.querySelector(`.sidebar-link[href="#${id}"]`)
+        if (link) link.classList.add('active')
+      }
+    })
+  }, { rootMargin: '-40% 0px -55% 0px' })
+
+  sections.forEach(s => observer.observe(s))
+</script>
+</body>
+</html>
