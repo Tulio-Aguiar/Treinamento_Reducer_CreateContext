@@ -1,0 +1,2070 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CSS Moderno 2026 — Página de Aprendizado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d1117;
+      --bg2: #161b22;
+      --bg3: #1c2333;
+      --border: #30363d;
+      --text: #e6edf3;
+      --text2: #8b949e;
+      --text3: #c9d1d9;
+      --accent: #f97316;
+      --accent-dim: rgba(249,115,22,0.1);
+      --accent-border: rgba(249,115,22,0.3);
+      --react: #61dafb;
+      --green: #34d399;
+      --yellow: #fbbf24;
+      --red: #f87171;
+      --sidebar-w: 280px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── SIDEBAR ── */
+    .sidebar {
+      width: var(--sidebar-w);
+      background: var(--bg2);
+      border-right: 1px solid var(--border);
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+      z-index: 100;
+    }
+
+    .sidebar-brand {
+      padding: 0 20px 24px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+
+    .sidebar-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text2);
+      text-decoration: none;
+      margin-bottom: 12px;
+      transition: color 0.2s;
+    }
+    .sidebar-back:hover { color: var(--text); }
+
+    .sidebar-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .sidebar-subtitle {
+      font-size: 11px;
+      color: var(--text2);
+      margin-top: 3px;
+    }
+
+    .sidebar-section {
+      padding: 0 12px;
+      margin-bottom: 8px;
+    }
+
+    .sidebar-section-label {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--text2);
+      padding: 8px 8px 6px;
+    }
+
+    .sidebar-link {
+      display: block;
+      padding: 7px 10px;
+      border-radius: 8px;
+      font-size: 13px;
+      color: var(--text2);
+      text-decoration: none;
+      transition: background 0.15s, color 0.15s;
+      line-height: 1.4;
+    }
+
+    .sidebar-link:hover { background: var(--bg3); color: var(--text); }
+    .sidebar-link.active { background: var(--accent-dim); color: var(--accent); font-weight: 500; }
+
+    .sidebar-link .difficulty {
+      float: right;
+      font-size: 10px;
+      padding: 1px 6px;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .diff-basic { background: rgba(52,211,153,0.15); color: var(--green); }
+    .diff-medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .diff-inter { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    /* ── MAIN ── */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      max-width: 860px;
+      padding: 60px 48px;
+    }
+
+    /* ── MOBILE HEADER ── */
+    .mobile-header {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 52px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 16px;
+      z-index: 200;
+    }
+
+    .mobile-header-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .mobile-menu-btn {
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      cursor: pointer;
+      padding: 6px 10px;
+      font-size: 16px;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+
+    .mobile-menu-btn:hover { background: var(--bg3); color: var(--text); }
+
+    .sidebar-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 99;
+    }
+
+    .sidebar-overlay.open { display: block; }
+
+    @media (max-width: 900px) {
+      .mobile-header { display: flex; }
+      .main { margin-left: 0; padding: 72px 20px 30px; }
+
+      .sidebar {
+        display: flex;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+        z-index: 100;
+      }
+
+      .sidebar.open { transform: translateX(0); }
+    }
+
+    /* ── OVERFLOW FIXES MOBILE ── */
+    .diagram {
+      overflow-x: auto;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      margin: 24px 0;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+    }
+
+    .table-wrapper .compare-table {
+      margin: 0;
+      border-radius: 0;
+      border: none;
+      min-width: 500px;
+    }
+
+    @media (max-width: 600px) {
+      .feature-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .support-row {
+        gap: 8px;
+      }
+
+      .section-title {
+        font-size: 1.25rem;
+      }
+
+      .hero h1 {
+        font-size: 1.8rem;
+      }
+    }
+
+    /* ── HERO ── */
+    .hero {
+      margin-bottom: 64px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .module-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 5px 12px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      border-radius: 20px;
+      color: var(--accent);
+      margin-bottom: 20px;
+    }
+
+    .hero h1 {
+      font-size: clamp(1.8rem, 4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 16px;
+    }
+
+    .hero h1 span { color: var(--accent); }
+
+    .hero p {
+      font-size: 1.05rem;
+      color: var(--text2);
+      line-height: 1.75;
+      max-width: 600px;
+    }
+
+    /* ── SECTION ── */
+    .section {
+      margin-bottom: 72px;
+      scroll-margin-top: 24px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 28px;
+    }
+
+    .section-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+    }
+
+    /* ── PROSE ── */
+    .prose {
+      font-size: 0.95rem;
+      line-height: 1.8;
+      color: var(--text3);
+    }
+
+    .prose + .prose { margin-top: 16px; }
+
+    .prose strong { color: var(--text); font-weight: 600; }
+    .prose code {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.82em;
+      padding: 2px 6px;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--accent);
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      padding: 16px 20px;
+      border-radius: 10px;
+      margin: 20px 0;
+      font-size: 0.9rem;
+      line-height: 1.7;
+      display: flex;
+      gap: 12px;
+    }
+
+    .callout-icon { font-size: 1.1rem; flex-shrink: 0; padding-top: 1px; }
+
+    .callout.info {
+      background: rgba(97,218,251,0.07);
+      border-left: 3px solid var(--react);
+      color: #93e8fb;
+    }
+
+    .callout.warn {
+      background: rgba(251,191,36,0.07);
+      border-left: 3px solid var(--yellow);
+      color: #fcd34d;
+    }
+
+    .callout.tip {
+      background: rgba(52,211,153,0.07);
+      border-left: 3px solid var(--green);
+      color: #6ee7b7;
+    }
+
+    .callout.danger {
+      background: rgba(248,113,113,0.07);
+      border-left: 3px solid var(--red);
+      color: #fca5a5;
+    }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      margin: 24px 0;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .code-filename {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      color: var(--text2);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .code-filename::before {
+      content: '';
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      opacity: 0.6;
+    }
+
+    .copy-btn {
+      font-size: 11px;
+      font-weight: 500;
+      padding: 4px 10px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text2);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .copy-btn:hover { background: var(--bg); color: var(--text); }
+    .copy-btn.copied { border-color: var(--green); color: var(--green); }
+
+    .code-block pre {
+      margin: 0 !important;
+      padding: 20px !important;
+      background: #0d1117 !important;
+      font-size: 0.83rem !important;
+      line-height: 1.7 !important;
+      overflow-x: auto;
+    }
+
+    .code-block code { font-family: 'JetBrains Mono', monospace !important; }
+
+    /* ── ANNOTATION ── */
+    .annotation {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin: -8px 0 20px;
+      font-size: 0.88rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    .annotation strong { color: var(--accent); }
+
+    /* ── VISUAL DIAGRAM ── */
+    .diagram {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 24px 0;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      line-height: 1.8;
+    }
+
+    .diagram-tree { color: var(--text2); }
+    .diagram-highlight { color: var(--react); font-weight: 500; }
+    .diagram-pain { color: var(--red); }
+    .diagram-ok { color: var(--green); }
+    .diagram-accent { color: var(--accent); font-weight: 500; }
+
+    /* ── STEP LIST ── */
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      margin: 24px 0;
+    }
+
+    .step {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      border: 1px solid var(--accent-border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+
+    .step-content { flex: 1; }
+
+    .step-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+
+    .step-desc {
+      font-size: 0.88rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    /* ── EXERCISE ── */
+    .exercise {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 28px 0;
+    }
+
+    .exercise-header {
+      padding: 16px 20px;
+      background: var(--bg3);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .exercise-badge {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .badge-basic { background: rgba(52,211,153,0.15); color: var(--green); }
+    .badge-medium { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .badge-inter { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    .exercise-title {
+      font-size: 0.95rem;
+      font-weight: 600;
+      flex: 1;
+    }
+
+    .exercise-body { padding: 20px; }
+
+    .exercise-desc {
+      font-size: 0.9rem;
+      color: var(--text2);
+      line-height: 1.7;
+      margin-bottom: 16px;
+    }
+
+    .exercise-tasks {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .exercise-tasks li {
+      font-size: 0.88rem;
+      color: var(--text3);
+      display: flex;
+      gap: 8px;
+      line-height: 1.5;
+    }
+
+    .exercise-tasks li::before {
+      content: '→';
+      color: var(--accent);
+      flex-shrink: 0;
+    }
+
+    .exercise-workspace {
+      background: var(--bg);
+      border: 1px dashed var(--border);
+      border-radius: 8px;
+      padding: 4px;
+    }
+
+    .workspace-label {
+      font-size: 11px;
+      color: var(--text2);
+      padding: 8px 12px 4px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .workspace-editor {
+      width: 100%;
+      min-height: 180px;
+      background: transparent;
+      border: none;
+      padding: 8px 12px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      resize: vertical;
+      outline: none;
+      line-height: 1.7;
+    }
+
+    .solution-toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.15s;
+      margin-top: 12px;
+    }
+
+    .solution-toggle:hover { background: var(--bg3); color: var(--text); }
+
+    .solution-block {
+      display: none;
+      margin-top: 16px;
+    }
+
+    .solution-block.open { display: block; }
+
+    /* ── COMPARE TABLE ── */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 24px 0;
+      font-size: 0.88rem;
+    }
+
+    .compare-table th {
+      text-align: left;
+      padding: 10px 16px;
+      background: var(--bg3);
+      color: var(--text2);
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .compare-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text3);
+      vertical-align: top;
+      line-height: 1.5;
+    }
+
+    .compare-table tr:last-child td { border-bottom: none; }
+    .compare-table tr:hover td { background: var(--bg2); }
+
+    .compare-table td:first-child {
+      font-family: 'JetBrains Mono', monospace;
+      color: var(--accent);
+      font-size: 0.82rem;
+      white-space: nowrap;
+    }
+
+    .check { color: var(--green); }
+    .cross { color: var(--red); }
+
+    /* ── DIVIDER ── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 48px 0;
+    }
+
+    /* ── FEATURE GRID ── */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 16px;
+      margin: 24px 0;
+    }
+
+    .feature-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+    }
+
+    .feature-card-icon {
+      font-size: 1.4rem;
+      margin-bottom: 10px;
+    }
+
+    .feature-card-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .feature-card-desc {
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+
+    /* ── SUPPORT BADGE ── */
+    .support-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 16px 0;
+    }
+
+    .support-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace;
+    }
+
+    .support-full { background: rgba(52,211,153,0.15); color: var(--green); }
+    .support-partial { background: rgba(251,191,36,0.15); color: var(--yellow); }
+    .support-none { background: rgba(248,113,113,0.15); color: var(--red); }
+
+    /* ── NAV FOOTER ── */
+    .nav-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 24px 0;
+      margin-top: 48px;
+      border-top: 1px solid var(--border);
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      color: var(--text2);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-link:hover { color: var(--accent); }
+    .nav-link.next { flex-direction: row-reverse; color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════ MOBILE HEADER ════════════════ -->
+<div class="mobile-header">
+  <span class="mobile-header-title">🎨 CSS Moderno 2026</span>
+  <button class="mobile-menu-btn" onclick="toggleMobileMenu()" aria-label="Abrir menu">☰</button>
+</div>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+<!-- ════════════════ SIDEBAR ════════════════ -->
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <a href="index.html" class="sidebar-back">← Início</a>
+    <div class="sidebar-title">🎨 CSS Moderno 2026</div>
+    <div class="sidebar-subtitle">Módulo 03 · Boas práticas atuais</div>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Visão Geral</div>
+    <a href="#overview" class="sidebar-link">O que mudou em 2026</a>
+    <a href="#custom-props" class="sidebar-link">Custom Properties avançadas</a>
+    <a href="#cascade-layers" class="sidebar-link">Cascade Layers (@layer)</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Layout & Seleção</div>
+    <a href="#container-queries" class="sidebar-link">Container Queries</a>
+    <a href="#has" class="sidebar-link">:has() — o seletor pai</a>
+    <a href="#subgrid" class="sidebar-link">Grid Subgrid</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Animações & Escopo</div>
+    <a href="#scroll-driven" class="sidebar-link">Scroll-Driven Animations</a>
+    <a href="#scope" class="sidebar-link">@scope & encapsulamento</a>
+    <a href="#nesting" class="sidebar-link">Nesting nativo</a>
+  </div>
+
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Exercícios</div>
+    <a href="#ex1" class="sidebar-link">Ex.1 — Card responsivo <span class="difficulty diff-basic">básico</span></a>
+    <a href="#ex2" class="sidebar-link">Ex.2 — Formulário inteligente <span class="difficulty diff-medium">médio</span></a>
+    <a href="#ex3" class="sidebar-link">Ex.3 — Progress de leitura <span class="difficulty diff-inter">inter</span></a>
+  </div>
+</nav>
+
+<!-- ════════════════ MAIN ════════════════ -->
+<main class="main">
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="module-tag">🎨 Módulo 03</div>
+    <h1>CSS <span>Moderno</span> 2026</h1>
+    <p>
+      O CSS evoluiu drasticamente nos últimos anos. Container Queries, <code>:has()</code>,
+      Cascade Layers e Scroll-Driven Animations chegaram ao baseline estável em 2025–2026.
+      Este módulo cobre o que realmente importa para produção hoje.
+    </p>
+  </div>
+
+  <!-- ═══ 01 · OVERVIEW ═══ -->
+  <section class="section" id="overview">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <h2 class="section-title">O que mudou no CSS em 2026</h2>
+    </div>
+
+    <p class="prose">
+      Em 2026, o CSS possui recursos que há cinco anos exigiriam pré-processadores, JavaScript
+      ou frameworks inteiros. O <strong>Interop 2025</strong> (esforço conjunto de Chrome, Firefox
+      e Safari) garantiu suporte consistente às funcionalidades mais pedidas pela comunidade.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-card-icon">📦</div>
+        <div class="feature-card-title">Container Queries</div>
+        <div class="feature-card-desc">Estilos baseados no tamanho do contêiner pai, não da viewport.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🎯</div>
+        <div class="feature-card-title">:has()</div>
+        <div class="feature-card-desc">Seleciona um elemento com base nos seus filhos — o "seletor pai".</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🗂️</div>
+        <div class="feature-card-title">Cascade Layers</div>
+        <div class="feature-card-desc">Organiza especificidade em camadas explícitas e ordenadas.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🎞️</div>
+        <div class="feature-card-title">Scroll-Driven Animations</div>
+        <div class="feature-card-desc">Animações vinculadas ao scroll sem uma linha de JavaScript.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔤</div>
+        <div class="feature-card-title">@property</div>
+        <div class="feature-card-desc">Custom properties tipadas, animáveis e com herança controlada.</div>
+      </div>
+      <div class="feature-card">
+        <div class="feature-card-icon">🔲</div>
+        <div class="feature-card-title">Nesting nativo</div>
+        <div class="feature-card-desc">Nesting de seletores sem Sass, diretamente no CSS.</div>
+      </div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div>
+        <strong>Baseline 2025/2026:</strong> Todos os recursos deste módulo têm suporte em Chrome 115+,
+        Firefox 117+ e Safari 17+. Verifique sempre em <code>caniuse.com</code> para os percentuais
+        exatos de cobertura global.
+      </div>
+    </div>
+
+    <p class="prose">
+      O CSS também ganhou <strong>nesting nativo</strong>, <strong>@scope</strong> para encapsulamento
+      sem BEM, e <strong>subgrid</strong> para alinhamento entre níveis do grid. A combinação desses
+      recursos elimina grande parte da necessidade de pré-processadores em projetos novos.
+    </p>
+  </section>
+
+  <!-- ═══ 02 · CUSTOM PROPERTIES ═══ -->
+  <section class="section" id="custom-props">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <h2 class="section-title">Custom Properties avançadas com <code>@property</code></h2>
+    </div>
+
+    <p class="prose">
+      A regra <code>@property</code> permite definir custom properties com <strong>tipo</strong>,
+      <strong>valor inicial</strong> e controle de <strong>herança</strong>. Isso desbloqueia
+      animações de variáveis CSS — algo impossível com <code>--variável: valor</code> comum.
+    </p>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div>
+        Custom properties normais não são animáveis porque o navegador as trata como strings.
+        Com <code>@property</code> você informa o tipo real e o browser pode interpolar os valores.
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">tokens.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Sem @property — NÃO é animável */
+:root {
+  --hue: 220;
+}
+
+/* Com @property — é animável! */
+@property --hue {
+  syntax: '<number>';      /* tipo: número inteiro ou decimal */
+  inherits: true;           /* herda do elemento pai */
+  initial-value: 220;       /* valor padrão obrigatório */
+}
+
+@property --progress {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --gradient-angle {
+  syntax: '<angle>';
+  inherits: false;
+  initial-value: 0deg;
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">animacao-hue.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Animação de cor girando o hue — só funciona com @property */
+@property --hue {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+.botao-magico {
+  --hue: 0;
+  background: hsl(var(--hue) 80% 60%);
+  transition: --hue 0.4s ease;
+  padding: 12px 24px;
+  border-radius: 8px;
+  border: none;
+  color: white;
+  cursor: pointer;
+}
+
+.botao-magico:hover {
+  --hue: 200; /* interpola suavemente de 0 → 200 */
+}
+
+/* Animação contínua do gradiente */
+@keyframes gira-gradiente {
+  to { --gradient-angle: 360deg; }
+}
+
+.card-animado {
+  background: conic-gradient(
+    from var(--gradient-angle),
+    oklch(70% 0.2 0),
+    oklch(70% 0.2 120),
+    oklch(70% 0.2 240),
+    oklch(70% 0.2 0)
+  );
+  animation: gira-gradiente 4s linear infinite;
+}</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>
+        Use <code>oklch()</code> ao invés de <code>hsl()</code> em 2026: é perceptualmente uniforme,
+        tem gamut maior (P3/Rec2020) e é mais previsível ao interpolar cores.
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">oklch-exemplo.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* oklch(lightness chroma hue) */
+:root {
+  --cor-primaria: oklch(60% 0.2 270);    /* roxo vibrante */
+  --cor-secundaria: oklch(65% 0.18 150); /* verde moderno */
+  --cor-texto: oklch(95% 0.01 270);      /* quase branco com toque lilás */
+
+  /* Escala de tons automaticamente derivada */
+  --primaria-claro: oklch(from var(--cor-primaria) calc(l + 0.15) c h);
+  --primaria-escuro: oklch(from var(--cor-primaria) calc(l - 0.15) c h);
+}
+
+/* Relative Color Syntax — deriva tons sem recalcular */
+.botao {
+  background: var(--cor-primaria);
+  border-color: oklch(from var(--cor-primaria) calc(l - 0.1) c h);
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ═══ 03 · CASCADE LAYERS ═══ -->
+  <section class="section" id="cascade-layers">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <h2 class="section-title">Cascade Layers com <code>@layer</code></h2>
+    </div>
+
+    <p class="prose">
+      <code>@layer</code> introduz um nível adicional na cascata do CSS — acima dos estilos
+      inline e abaixo das regras <code>!important</code>. Com layers, a <strong>ordem de declaração
+      das camadas</strong> determina qual estilo vence, independentemente da especificidade dos seletores.
+    </p>
+
+    <div class="diagram">
+      <div class="diagram-accent">Cascata CSS (da menor para maior prioridade):</div>
+      <br>
+      <div class="diagram-tree">  1. User-agent styles (reset do browser)</div>
+      <div class="diagram-tree">  2. @layer reset      — reset/normalize</div>
+      <div class="diagram-tree">  3. @layer base       — estilos globais, tokens</div>
+      <div class="diagram-tree">  4. @layer components — componentes reutilizáveis</div>
+      <div class="diagram-tree">  5. @layer utilities  — classes utilitárias (.mt-4, .flex)</div>
+      <div class="diagram-ok">  6. Estilos não-layered (vence layers!)</div>
+      <div class="diagram-highlight">  7. !important (como antes)</div>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div>
+        Estilos <strong>fora de layers</strong> sempre vencem estilos dentro de layers,
+        independente de especificidade. Use isso para overrides pontuais sem precisar de
+        <code>!important</code>.
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">main.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* 1. Declare a ordem das layers antes de tudo */
+@layer reset, base, components, utilities;
+
+/* 2. Reset — especificidade baixa, não vaza para cima */
+@layer reset {
+  *, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+}
+
+/* 3. Base — tokens e estilos globais */
+@layer base {
+  :root {
+    --clr-primary: oklch(60% 0.2 270);
+    --radius-md: 8px;
+  }
+
+  body {
+    font-family: system-ui, sans-serif;
+    color: oklch(20% 0.01 270);
+  }
+}
+
+/* 4. Components — mesmo com especificidade alta, layers de componentes
+      perdem para a camada utilities */
+@layer components {
+  .card {
+    background: white;
+    border-radius: var(--radius-md);
+    padding: 24px;
+    box-shadow: 0 2px 8px oklch(0% 0 0 / 0.1);
+  }
+
+  /* .card.card-dark tem especificidade [0,2,0] mas como está em 'components'
+     perde para qualquer coisa em 'utilities' */
+  .card.card-dark {
+    background: oklch(20% 0.01 270);
+    color: white;
+  }
+}
+
+/* 5. Utilities — vence components independente de especificidade */
+@layer utilities {
+  .bg-white { background: white !important; /* aqui o !important é seguro */ }
+  .p-0 { padding: 0; }
+  .hidden { display: none; }
+}
+
+/* 6. Estilos fora de layer — vence tudo que está em layers */
+.override-especial {
+  background: red; /* vence mesmo .card.card-dark em @layer components */
+}</code></pre>
+    </div>
+
+    <p class="prose">
+      Você também pode importar arquivos inteiros dentro de uma layer, o que é especialmente
+      útil para isolar bibliotecas de terceiros:
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">imports.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Toda a biblioteca de terceiros fica "abaixo" dos seus estilos */
+@import url('alguma-biblioteca.css') layer(bibliotecas);
+
+/* Seus estilos fora de layer vencem automaticamente */
+.meu-botao {
+  background: var(--clr-primary);
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ═══ 04 · CONTAINER QUERIES ═══ -->
+  <section class="section" id="container-queries">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <h2 class="section-title">Container Queries</h2>
+    </div>
+
+    <p class="prose">
+      Container Queries permitem que um componente se adapte ao <strong>tamanho do seu contêiner pai</strong>,
+      não da viewport. Isso resolve o problema fundamental de componentes responsivos: um card de produto
+      deve se comportar diferente quando está numa sidebar estreita vs. numa grade larga — e isso não
+      depende do tamanho da tela, mas do espaço disponível.
+    </p>
+
+    <div class="diagram">
+      <div class="diagram-accent">Media Query (viewport) vs Container Query (contêiner):</div>
+      <br>
+      <div class="diagram-pain">  Media Query: "A tela tem mais de 768px?" → layout de 2 colunas</div>
+      <div class="diagram-pain">  Problema: o componente pode estar numa sidebar de 300px!</div>
+      <br>
+      <div class="diagram-ok">  Container Query: "O contêiner do card tem mais de 400px?" → layout horizontal</div>
+      <div class="diagram-ok">  Funciona independente de onde o componente é usado!</div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">card.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* 1. Defina o contêiner no elemento pai */
+.card-wrapper {
+  container-type: inline-size; /* monitora a largura */
+  container-name: card;        /* nome opcional, mas boa prática */
+}
+
+/* 2. Use @container para estilizar filhos com base no contêiner */
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card img {
+  width: 100%;
+  border-radius: 8px;
+}
+
+/* Quando o contêiner (card-wrapper) tiver 400px ou mais */
+@container card (min-width: 400px) {
+  .card {
+    flex-direction: row;    /* horizontal quando há espaço */
+    align-items: center;
+  }
+
+  .card img {
+    width: 140px;
+    flex-shrink: 0;
+  }
+}
+
+/* Unidades de container */
+.card-title {
+  /* cqw = 1% da largura do contêiner (não da viewport!) */
+  font-size: clamp(1rem, 5cqw, 1.5rem);
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">container-avancado.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Container style queries — estilos baseados em valores de variáveis CSS */
+.grid {
+  container-type: inline-size;
+  --layout: normal;
+}
+
+.grid.lista {
+  --layout: list;
+}
+
+/* Style query: adapta com base em variável CSS do contêiner */
+@container style(--layout: list) {
+  .grid-item {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+}
+
+/* Múltiplos contêineres aninhados */
+.dashboard { container-type: inline-size; container-name: dashboard; }
+.sidebar   { container-type: inline-size; container-name: sidebar; }
+
+@container dashboard (min-width: 1024px) {
+  .sidebar { width: 280px; }
+}
+
+@container sidebar (max-width: 200px) {
+  .sidebar-item span { display: none; } /* só ícone em sidebar estreita */
+}</code></pre>
+    </div>
+
+    <div class="callout tip">
+      <span class="callout-icon">💡</span>
+      <div>
+        Use <code>container-type: size</code> quando precisar monitorar altura <em>e</em> largura.
+        Use <code>inline-size</code> (mais comum) quando só a largura importa — é mais eficiente.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 05 · HAS ═══ -->
+  <section class="section" id="has">
+    <div class="section-header">
+      <div class="section-number">05</div>
+      <h2 class="section-title"><code>:has()</code> — O seletor pai</h2>
+    </div>
+
+    <p class="prose">
+      <code>:has()</code> seleciona um elemento com base nos seus <strong>descendentes ou estados de filhos</strong>.
+      É o seletor que a comunidade CSS pediu por décadas. Com ele, você consegue estilizar um elemento
+      pai com base no que há dentro dele — sem JavaScript.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">has-basico.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Estiliza .card se ele contiver uma imagem */
+.card:has(img) {
+  padding: 0;          /* remove padding quando há imagem */
+}
+
+/* Estiliza .form-group se o input dentro estiver focado */
+.form-group:has(input:focus) {
+  border-color: oklch(60% 0.2 270);
+  box-shadow: 0 0 0 3px oklch(60% 0.2 270 / 0.2);
+}
+
+/* Estiliza .form-group se o input for inválido */
+.form-group:has(input:invalid:not(:placeholder-shown)) {
+  border-color: oklch(60% 0.25 30); /* vermelho */
+}
+
+.form-group:has(input:valid:not(:placeholder-shown)) {
+  border-color: oklch(60% 0.2 150); /* verde */
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">has-avancado.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Layout condicional: se a lista tiver mais de 3 itens */
+.lista:has(li:nth-child(4)) {
+  column-count: 2;
+}
+
+/* Navbar ativa hambúrguer no mobile — sem JS para toggle de class */
+/* (combina com :checked em checkbox hidden) */
+.nav:has(.hamburger:checked) .menu {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Dark mode baseado em checkbox — exemplo educacional */
+body:has(#dark-toggle:checked) {
+  --bg: oklch(15% 0.01 270);
+  --text: oklch(95% 0.01 270);
+}
+
+/* Estiliza o label do checkbox quando checked */
+label:has(input[type="checkbox"]:checked) {
+  font-weight: 600;
+  color: oklch(60% 0.2 270);
+}
+
+/* Tabela: linha com célula .erro fica vermelha */
+tr:has(.erro) {
+  background: oklch(60% 0.2 30 / 0.1);
+}
+
+/* Figura sem legenda: margem diferente */
+figure:not(:has(figcaption)) {
+  margin-bottom: 8px;
+}</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div>
+        <code>:has()</code> é um seletor <strong>guloso</strong> em termos de performance: evite
+        usá-lo com seletores muito amplos como <code>body:has(*)</code>. Prefira escopo específico:
+        <code>.form:has(input:focus)</code>.
+      </div>
+    </div>
+
+    <div class="table-wrapper">
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Antes (JS)</th>
+          <th>Depois (:has())</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>input.addEventListener('focus', () => parent.classList.add('focused'))</td>
+          <td>.grupo:has(input:focus) { border-color: blue; }</td>
+        </tr>
+        <tr>
+          <td>if (card.querySelector('img')) card.style.padding = '0'</td>
+          <td>.card:has(img) { padding: 0; }</td>
+        </tr>
+        <tr>
+          <td>checkbox.addEventListener('change', toggleDarkMode)</td>
+          <td>body:has(#dark:checked) { color-scheme: dark; }</td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+  </section>
+
+  <!-- ═══ 06 · SCROLL-DRIVEN ═══ -->
+  <section class="section" id="scroll-driven">
+    <div class="section-header">
+      <div class="section-number">06</div>
+      <h2 class="section-title">Scroll-Driven Animations</h2>
+    </div>
+
+    <p class="prose">
+      Scroll-Driven Animations vinculam o progresso de uma animação CSS ao <strong>scroll da página</strong>
+      ou à posição de um elemento na viewport — sem JavaScript. Isso substitui
+      <code>IntersectionObserver</code> e bibliotecas como AOS para grande parte dos casos de uso.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">animation-timeline: scroll()</div>
+          <div class="step-desc">Progresso vinculado ao scroll do scroller (padrão: o documento). 0% = topo, 100% = final.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">animation-timeline: view()</div>
+          <div class="step-desc">Progresso vinculado à posição do <em>próprio elemento</em> no viewport. 0% = entrou, 100% = saiu.</div>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">animation-range</div>
+          <div class="step-desc">Define qual fatia do scroll (ou da view) dispara a animação.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">progress-bar.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Barra de progresso de leitura — clássico com JS, agora em CSS puro */
+@keyframes cresce-largura {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: oklch(60% 0.2 270);
+  transform-origin: left;
+
+  animation: cresce-largura linear;
+  animation-timeline: scroll(root block); /* scroll do documento na direção block */
+  animation-fill-mode: both;
+}</code></pre>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">reveal-on-scroll.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Elemento aparece ao entrar na viewport */
+@keyframes fade-slide-up {
+  from {
+    opacity: 0;
+    translate: 0 40px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.reveal {
+  animation: fade-slide-up 0.6s ease-out both;
+  animation-timeline: view();
+
+  /* Dispara quando o elemento está entre 10% e 40% da viewport */
+  animation-range: entry 10% entry 40%;
+}
+
+/* Stagger: cada filho anima com atraso crescente usando @keyframes + delay */
+.reveal-list li {
+  animation: fade-slide-up 0.5s ease-out both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 60%;
+}
+
+.reveal-list li:nth-child(1) { animation-delay: 0s; }
+.reveal-list li:nth-child(2) { animation-delay: 0.1s; }
+.reveal-list li:nth-child(3) { animation-delay: 0.2s; }</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div>
+        Respeite <strong>prefers-reduced-motion</strong>: sempre envolva animações em
+        <code>@media (prefers-reduced-motion: no-preference)</code> ou adicione o reset
+        <code>* { animation-duration: 0.01ms !important; }</code> para usuários sensíveis.
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">acessibilidade.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Padrão recomendado para animações acessíveis */
+@media (prefers-reduced-motion: no-preference) {
+  .reveal {
+    animation: fade-slide-up 0.6s ease-out both;
+    animation-timeline: view();
+    animation-range: entry 10% entry 40%;
+  }
+
+  .reading-progress {
+    animation: cresce-largura linear;
+    animation-timeline: scroll(root block);
+  }
+}</code></pre>
+    </div>
+  </section>
+
+  <!-- ═══ 07 · SCOPE ═══ -->
+  <section class="section" id="scope">
+    <div class="section-header">
+      <div class="section-number">07</div>
+      <h2 class="section-title"><code>@scope</code> e encapsulamento</h2>
+    </div>
+
+    <p class="prose">
+      <code>@scope</code> permite aplicar estilos a um componente sem precisar de BEM, CSS Modules
+      ou Shadow DOM. Você define um <strong>escopo de raiz</strong> e, opcionalmente, um
+      <strong>limite de saída</strong>: os estilos se aplicam apenas dentro desse intervalo.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">card-component.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* @scope(raiz) to (limite) */
+/* Estilos se aplicam dentro de .card mas param antes de .card-footer */
+@scope (.card) to (.card-footer) {
+  /* ':scope' referencia o elemento raiz (.card) */
+  :scope {
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+  }
+
+  /* .title dentro de .card (mas não dentro de .card-footer) */
+  .title {
+    font-size: 1.4rem;
+    font-weight: 700;
+  }
+
+  /* Não vaza para .title fora do .card */
+  p { color: oklch(40% 0.01 270); }
+}
+
+/* O footer fica fora do escopo, tem seus próprios estilos */
+@scope (.card-footer) {
+  :scope {
+    background: oklch(97% 0.01 270);
+    padding: 16px 24px;
+    border-top: 1px solid oklch(90% 0.01 270);
+  }
+}</code></pre>
+    </div>
+
+    <div class="callout info">
+      <span class="callout-icon">ℹ️</span>
+      <div>
+        Em projetos que já usam CSS Modules ou Shadow DOM, <code>@scope</code> pode não
+        ser necessário. Ele brilha em projetos de CSS puro onde o encapsulamento manual era
+        feito com prefixos de classe (BEM: <code>.card__title</code>, <code>.card__body</code>).
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 08 · SUBGRID ═══ -->
+  <section class="section" id="subgrid">
+    <div class="section-header">
+      <div class="section-number">08</div>
+      <h2 class="section-title">Grid Subgrid</h2>
+    </div>
+
+    <p class="prose">
+      <code>subgrid</code> permite que um item de grid <strong>participe das trilhas (tracks) do grid pai</strong>,
+      alinhando elementos aninhados com o grid externo. Resolve o problema clássico de cards em uma grade
+      cujos títulos e botões não alinhavam entre si.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">card-grid.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Grid pai define as linhas */
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+
+  /* Define linhas nomeadas: imagem, título, descrição, footer */
+  grid-template-rows: auto auto 1fr auto;
+  gap: 24px;
+}
+
+/* Cada card vira um subgrid que herda as linhas do pai */
+.card {
+  display: grid;
+  grid-row: span 4;             /* ocupa as 4 linhas definidas acima */
+  grid-template-rows: subgrid;  /* usa as trilhas do pai! */
+
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+/* Agora cada parte do card se alinha automaticamente entre cards */
+.card-image   { grid-row: 1; }     /* linha 1: imagem */
+.card-title   { grid-row: 2; padding: 16px; font-weight: 700; }
+.card-desc    { grid-row: 3; padding: 0 16px; color: gray; }
+.card-footer  { grid-row: 4; padding: 16px; border-top: 1px solid #eee; }
+
+/* Resultado: títulos, descrições e botões alinhados entre cards,
+   mesmo quando o conteúdo tem comprimentos diferentes! */</code></pre>
+    </div>
+  </section>
+
+  <!-- ═══ 09 · NESTING ═══ -->
+  <section class="section" id="nesting">
+    <div class="section-header">
+      <div class="section-number">09</div>
+      <h2 class="section-title">Nesting nativo</h2>
+    </div>
+
+    <p class="prose">
+      CSS agora suporta nesting nativo — sem Sass ou PostCSS. O <code>&</code> referencia o seletor
+      pai, assim como no Sass. Há algumas diferenças sutis que valem a pena conhecer.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">nesting.css</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-css">/* Nesting básico */
+.card {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+
+  /* Equivale a: .card .card-title */
+  .card-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  /* Equivale a: .card:hover */
+  &:hover {
+    box-shadow: 0 4px 20px oklch(0% 0 0 / 0.1);
+  }
+
+  /* Equivale a: .card.card--destaque */
+  &.card--destaque {
+    border: 2px solid oklch(60% 0.2 270);
+  }
+
+  /* Media query aninhada */
+  @media (max-width: 768px) {
+    padding: 16px;
+
+    .card-title { font-size: 1rem; }
+  }
+
+  /* Container query aninhada */
+  @container (min-width: 400px) {
+    display: flex;
+    gap: 16px;
+  }
+}
+
+/* Combinação com :has() e nesting */
+.form {
+  .form-group {
+    border: 1px solid oklch(80% 0.01 270);
+    padding: 12px;
+    border-radius: 8px;
+
+    &:has(input:focus) {
+      border-color: oklch(60% 0.2 270);
+    }
+
+    &:has(input:invalid:not(:placeholder-shown)) {
+      border-color: oklch(60% 0.2 30);
+    }
+  }
+}</code></pre>
+    </div>
+
+    <div class="callout warn">
+      <span class="callout-icon">⚠️</span>
+      <div>
+        <strong>Diferença do Sass:</strong> em CSS nativo, <code>.titulo</code> dentro de <code>.card</code>
+        equivale a <code>.card .titulo</code> (descendente), não <code>.card.titulo</code> (mesmo elemento).
+        Para estilizar o próprio elemento com outra classe, use <code>&.outra-classe</code>.
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══ 10 · EXERCÍCIOS ═══ -->
+  <section class="section" id="exercicios">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <h2 class="section-title">Exercícios práticos</h2>
+    </div>
+
+    <p class="prose">
+      Três exercícios de vida real, cobrindo os principais recursos do módulo.
+      Escreva o CSS na área de código e verifique a solução quando terminar.
+    </p>
+
+    <!-- Exercício 1 -->
+    <div class="exercise" id="ex1">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-basic">Básico</span>
+        <span class="exercise-title">Card de produto responsivo com Container Queries</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Crie um card de produto que muda de layout vertical para horizontal automaticamente,
+          baseado no tamanho do seu contêiner — sem media queries. O card deve funcionar
+          igualmente bem em uma sidebar estreita (250px) e em uma grade larga (500px+).
+        </p>
+        <ul class="exercise-tasks">
+          <li>Defina <code>container-type: inline-size</code> no wrapper do card</li>
+          <li>Layout vertical (imagem em cima, texto embaixo) quando o contêiner &lt; 360px</li>
+          <li>Layout horizontal (imagem à esquerda, texto à direita) quando o contêiner ≥ 360px</li>
+          <li>Use unidades <code>cqw</code> para o font-size do título</li>
+          <li>Inclua um botão "Comprar" que ocupa 100% da largura no layout vertical</li>
+        </ul>
+        <div class="exercise-workspace">
+          <div class="workspace-label">/* CSS — escreva sua solução aqui */</div>
+          <textarea class="workspace-editor" spellcheck="false" placeholder=".produto-wrapper {
+  /* defina o contêiner aqui */
+}
+
+.produto-card {
+  /* layout base (mobile/estreito) */
+}
+
+@container /* ... */ {
+  /* layout horizontal */
+}"></textarea>
+        </div>
+        <button class="solution-toggle" onclick="toggleSolution(this)">👁 Ver solução</button>
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">card-produto.css</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-css">.produto-wrapper {
+  container-type: inline-size;
+  container-name: produto;
+}
+
+.produto-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 12px oklch(0% 0 0 / 0.08);
+}
+
+.produto-card img {
+  width: 100%;
+  aspect-ratio: 16/9;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.produto-titulo {
+  font-size: clamp(1rem, 5cqw, 1.4rem);
+  font-weight: 700;
+}
+
+.produto-preco {
+  font-size: clamp(0.9rem, 4cqw, 1.1rem);
+  color: oklch(45% 0.18 150);
+  font-weight: 600;
+}
+
+.produto-btn {
+  width: 100%;
+  padding: 12px;
+  background: oklch(55% 0.2 270);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+@container produto (min-width: 360px) {
+  .produto-card {
+    flex-direction: row;
+    align-items: center;
+  }
+
+  .produto-card img {
+    width: 140px;
+    aspect-ratio: 1;
+    flex-shrink: 0;
+  }
+
+  .produto-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .produto-btn {
+    width: auto;
+    align-self: flex-start;
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 2 -->
+    <div class="exercise" id="ex2">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-medium">Médio</span>
+        <span class="exercise-title">Formulário inteligente com <code>:has()</code></span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Crie um formulário de cadastro cujos campos se estilizam automaticamente com base no estado dos inputs —
+          sem uma linha de JavaScript. O grupo do campo deve mudar visualmente quando o input está focado,
+          preenchido corretamente, ou com erro de validação.
+        </p>
+        <ul class="exercise-tasks">
+          <li>Campo focado: borda colorida e label elevado (float label)</li>
+          <li>Campo válido: ícone ✓ e borda verde</li>
+          <li>Campo inválido (após interação): ícone ✗ e borda vermelha</li>
+          <li>Use <code>:has()</code> para todos os estados — nenhum JS permitido</li>
+          <li>O botão de submit só fica habilitado visualmente quando o form é válido</li>
+        </ul>
+        <div class="exercise-workspace">
+          <div class="workspace-label">/* CSS — escreva sua solução aqui */</div>
+          <textarea class="workspace-editor" spellcheck="false" placeholder=".form-group {
+  /* estilos base */
+}
+
+.form-group:has(input:focus) {
+  /* estado focado */
+}
+
+.form-group:has(input:valid:not(:placeholder-shown)) {
+  /* estado válido */
+}"></textarea>
+        </div>
+        <button class="solution-toggle" onclick="toggleSolution(this)">👁 Ver solução</button>
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">formulario.css</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-css">.form-group {
+  position: relative;
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: oklch(50% 0.01 270);
+  margin-bottom: 6px;
+  transition: color 0.2s;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 40px 12px 14px; /* espaço para ícone */
+  border: 2px solid oklch(85% 0.01 270);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  background: white;
+}
+
+/* Ícone via pseudo-elemento no .form-group */
+.form-group::after {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  font-size: 0.9rem;
+}
+
+/* Estado: focado */
+.form-group:has(input:focus) label {
+  color: oklch(55% 0.2 270);
+}
+
+.form-group:has(input:focus) input {
+  border-color: oklch(55% 0.2 270);
+  box-shadow: 0 0 0 3px oklch(55% 0.2 270 / 0.15);
+}
+
+/* Estado: válido */
+.form-group:has(input:valid:not(:placeholder-shown)) input {
+  border-color: oklch(55% 0.2 150);
+}
+
+.form-group:has(input:valid:not(:placeholder-shown))::after {
+  content: '✓';
+  color: oklch(55% 0.2 150);
+}
+
+/* Estado: inválido (após preenchimento) */
+.form-group:has(input:invalid:not(:placeholder-shown)) input {
+  border-color: oklch(55% 0.25 30);
+}
+
+.form-group:has(input:invalid:not(:placeholder-shown))::after {
+  content: '✗';
+  color: oklch(55% 0.25 30);
+}
+
+.form-group:has(input:invalid:not(:placeholder-shown)) label {
+  color: oklch(55% 0.25 30);
+}
+
+/* Botão: visualmente desabilitado se o form tiver campos inválidos */
+.form:has(input:invalid) .btn-submit {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 3 -->
+    <div class="exercise" id="ex3">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-inter">Intermediário</span>
+        <span class="exercise-title">Barra de progresso de leitura com Scroll-Driven Animations</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Implemente uma barra de progresso de leitura no topo da página usando Scroll-Driven Animations
+          e <code>@property</code> para animar a cor da barra conforme o usuário avança no conteúdo.
+          Zero JavaScript.
+        </p>
+        <ul class="exercise-tasks">
+          <li>Barra fixa no topo, 4px de altura, largura de 100%</li>
+          <li>Cresce da esquerda para a direita conforme o scroll (0% → 100%)</li>
+          <li>Cor muda de azul (topo) para laranja (fim) usando <code>@property</code> para animar <code>--hue</code></li>
+          <li>Adicione <code>prefers-reduced-motion</code> para acessibilidade</li>
+          <li>Bônus: adicione indicadores de seção com <code>view()</code> nos headings</li>
+        </ul>
+        <div class="exercise-workspace">
+          <div class="workspace-label">/* CSS — escreva sua solução aqui */</div>
+          <textarea class="workspace-editor" spellcheck="false" placeholder="@property --hue {
+  /* defina o tipo e valor inicial */
+}
+
+@keyframes /* ... */ {
+}
+
+.progress-bar {
+  /* posição e animação */
+  animation-timeline: scroll(root block);
+}"></textarea>
+        </div>
+        <button class="solution-toggle" onclick="toggleSolution(this)">👁 Ver solução</button>
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">reading-progress.css</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-css">/* 1. Custom property tipada para animar a cor */
+@property --hue {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 220; /* começa azul */
+}
+
+/* 2. Animação: barra cresce e muda de cor */
+@keyframes progresso-leitura {
+  from {
+    transform: scaleX(0);
+    --hue: 220; /* azul */
+  }
+  to {
+    transform: scaleX(1);
+    --hue: 30;  /* laranja */
+  }
+}
+
+/* 3. Barra de progresso */
+.reading-progress {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: oklch(60% 0.22 var(--hue));
+  transform-origin: left center;
+  z-index: 1000;
+
+  /* Vinculada ao scroll da página */
+  animation: progresso-leitura linear both;
+  animation-timeline: scroll(root block);
+}
+
+/* 4. Bônus: seções revelam ao entrar na viewport */
+@keyframes revela-secao {
+  from { opacity: 0; translate: 0 30px; }
+  to   { opacity: 1; translate: 0 0; }
+}
+
+.article-section {
+  animation: revela-secao 0.5s ease-out both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 35%;
+}
+
+/* 5. Acessibilidade */
+@media (prefers-reduced-motion: reduce) {
+  .reading-progress {
+    animation: none;
+    transform: none; /* mostra a barra estática */
+    opacity: 0.3;
+  }
+
+  .article-section {
+    animation: none;
+    opacity: 1;
+    translate: 0 0;
+  }
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- NAV FOOTER -->
+  <div class="nav-footer">
+    <a href="index.html" class="nav-link">← Início</a>
+    <a href="tailwind.html" class="nav-link next">Módulo 04: Tailwind CSS →</a>
+  </div>
+
+</main>
+
+<script>
+  hljs.highlightAll()
+
+  function toggleMobileMenu() {
+    const sidebar = document.getElementById('sidebar')
+    const overlay = document.getElementById('sidebar-overlay')
+    sidebar.classList.toggle('open')
+    overlay.classList.toggle('open')
+  }
+
+  function closeMobileMenu() {
+    document.getElementById('sidebar').classList.remove('open')
+    document.getElementById('sidebar-overlay').classList.remove('open')
+  }
+
+  // Fecha o menu ao clicar em um link da sidebar (mobile)
+  document.querySelectorAll('.sidebar-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 900) closeMobileMenu()
+    })
+  })
+
+  function copyCode(btn) {
+    const pre = btn.closest('.code-block').querySelector('pre')
+    navigator.clipboard.writeText(pre.innerText).then(() => {
+      btn.textContent = '✓ Copiado'
+      btn.classList.add('copied')
+      setTimeout(() => {
+        btn.textContent = 'Copiar'
+        btn.classList.remove('copied')
+      }, 2000)
+    })
+  }
+
+  function toggleSolution(btn) {
+    const block = btn.nextElementSibling
+    const isOpen = block.classList.contains('open')
+    block.classList.toggle('open')
+    btn.textContent = isOpen ? '👁 Ver solução' : '🙈 Ocultar solução'
+    if (!isOpen) hljs.highlightAll()
+  }
+
+  const links = document.querySelectorAll('.sidebar-link')
+  const sections = document.querySelectorAll('.section')
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        links.forEach(l => l.classList.remove('active'))
+        const id = entry.target.id
+        const link = document.querySelector(`.sidebar-link[href="#${id}"]`)
+        if (link) link.classList.add('active')
+      }
+    })
+  }, { rootMargin: '-40% 0px -55% 0px' })
+
+  sections.forEach(s => observer.observe(s))
+</script>
+</body>
+</html>
