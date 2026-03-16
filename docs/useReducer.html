@@ -813,8 +813,1668 @@
     </p>
   </div>
 
-  <!-- Conteúdo original do módulo (omitido aqui por brevidade) -->
+  <!-- ═══ SEÇÃO 1: O QUE É UM REDUCER ═══ -->
+  <section class="section" id="conceito">
+    <div class="section-header">
+      <div class="section-number">01</div>
+      <h2 class="section-title">O que é um reducer</h2>
+    </div>
 
+    <p class="prose">
+      Um reducer é uma <strong>função pura</strong> que recebe o estado atual e uma ação,
+      e retorna o próximo estado. É o mesmo conceito que <code>Array.reduce()</code>:
+      dado um acumulador e um valor, retorna um novo acumulador.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">conceito-basico.ts</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// A assinatura de qualquer reducer:
+// (estado atual, ação) => próximo estado
+function reducer(state: State, action: Action): State {
+  // lógica aqui
+  return nextState
+}
+
+// Comparação com Array.reduce:
+// (acumulador, valorAtual) => novoAcumulador
+[1, 2, 3].reduce((acc, val) => acc + val, 0) // → 6</code></pre>
+    </div>
+
+    <p class="prose">
+      O padrão foi popularizado pelo Redux mas é agnóstico de biblioteca.
+      React o incorporou nativamente via <code>useReducer</code>, sem dependências externas.
+      A vantagem central: a lógica de atualização de estado fica isolada,
+      nomeada, testável e previsível.
+    </p>
+
+    <div class="callout info">
+      <span class="callout-icon">📌</span>
+      <div>
+        <strong>Função pura</strong> significa: dado o mesmo estado e a mesma ação,
+        o reducer <strong>sempre</strong> retorna o mesmo resultado. Sem efeitos colaterais,
+        sem chamadas de API, sem mutação direta do estado.
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 2: ANATOMIA COMPLETA ═══ -->
+  <section class="section" id="anatomia">
+    <div class="section-header">
+      <div class="section-number">02</div>
+      <h2 class="section-title">Anatomia completa</h2>
+    </div>
+
+    <p class="prose">
+      <code>useReducer</code> tem quatro peças fundamentais. Entender cada uma
+      é entender por que o padrão funciona.
+    </p>
+
+    <div class="anatomy">
+      <div class="anatomy-header">Partes do useReducer</div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">state</div>
+        <div class="anatomy-def">O estado atual do componente. Pode ser qualquer tipo: número, string, objeto, array. É imutável — nunca modifique diretamente.</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">dispatch</div>
+        <div class="anatomy-def">Função para enviar ações ao reducer. Chamar <code>dispatch(action)</code> agenda uma re-renderização com o novo estado retornado pelo reducer.</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">reducer</div>
+        <div class="anatomy-def">Função pura <code>(state, action) =&gt; newState</code>. Contém toda a lógica de transição de estado. Vive fora do componente.</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">action</div>
+        <div class="anatomy-def">Objeto que descreve o que aconteceu. Convencionalmente tem <code>type</code> (string) e, opcionalmente, <code>payload</code> com os dados adicionais.</div>
+      </div>
+      <div class="anatomy-row">
+        <div class="anatomy-term">initialState</div>
+        <div class="anatomy-def">O estado inicial passado como segundo argumento para <code>useReducer</code>. Usado apenas na primeira renderização.</div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">anatomia.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer } from 'react'
+
+// ── Tipos ───────────────────────────────────────────────
+interface State {
+  count: number
+}
+
+type Action =
+  | { type: 'INCREMENT' }
+  | { type: 'DECREMENT' }
+  | { type: 'RESET' }
+
+// ── Reducer (fora do componente) ─────────────────────────
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case 'INCREMENT':
+      return { count: state.count + 1 }
+    case 'DECREMENT':
+      return { count: state.count - 1 }
+    case 'RESET':
+      return { count: 0 }
+    default:
+      return state  // Sempre retorne o state atual para ações desconhecidas
+  }
+}
+
+// ── Estado inicial ───────────────────────────────────────
+const initialState: State = { count: 0 }
+
+// ── Componente ───────────────────────────────────────────
+export function Counter() {
+  const [state, dispatch] = useReducer(reducer, initialState)
+  //     └─ state atual    └─ função para enviar ações
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Contador: {state.count}&lt;/p&gt;
+      &lt;button onClick={() => dispatch({ type: 'INCREMENT' })}&gt;+&lt;/button&gt;
+      &lt;button onClick={() => dispatch({ type: 'DECREMENT' })}&gt;-&lt;/button&gt;
+      &lt;button onClick={() => dispatch({ type: 'RESET' })}&gt;Reset&lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+    </div>
+
+    <div class="flow">
+      <div class="flow-node react">
+        <div class="flow-node-label">Componente</div>
+        <div class="flow-node-desc">chama dispatch</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node yellow">
+        <div class="flow-node-label">Action</div>
+        <div class="flow-node-desc">{ type, payload }</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node purple">
+        <div class="flow-node-label">Reducer</div>
+        <div class="flow-node-desc">função pura</div>
+      </div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-node accent">
+        <div class="flow-node-label">New State</div>
+        <div class="flow-node-desc">re-render</div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 3: REDUCER VS USESTATE ═══ -->
+  <section class="section" id="vs-state">
+    <div class="section-header">
+      <div class="section-number">03</div>
+      <h2 class="section-title">Reducer vs useState</h2>
+    </div>
+
+    <p class="prose">
+      <code>useReducer</code> não substitui <code>useState</code> — eles resolvem
+      problemas diferentes. A escolha errada complica o código sem necessidade.
+    </p>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Critério</th>
+          <th>useState</th>
+          <th>useReducer</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Complexidade do estado</td>
+          <td><span class="check">Simples</span> — primitivos, objetos pequenos</td>
+          <td><span class="check">Complexo</span> — múltiplos campos inter-relacionados</td>
+        </tr>
+        <tr>
+          <td>Número de ações</td>
+          <td><span class="check">1-3</span> tipos de update</td>
+          <td><span class="check">4+</span> tipos distintos de ação</td>
+        </tr>
+        <tr>
+          <td>Lógica de transição</td>
+          <td>Inline no componente</td>
+          <td>Isolada, nomeada e testável</td>
+        </tr>
+        <tr>
+          <td>Testabilidade</td>
+          <td>Requer renderização</td>
+          <td><span class="check">Função pura</span> — teste unitário direto</td>
+        </tr>
+        <tr>
+          <td>Próximo estado depende do anterior</td>
+          <td>Usa callback: <code>setX(prev => ...)</code></td>
+          <td><span class="check">Sempre</span> tem acesso ao state atual</td>
+        </tr>
+        <tr>
+          <td>Debugging</td>
+          <td>Difícil rastrear mudanças</td>
+          <td><span class="check">Ações nomeadas</span> facilitam rastreamento</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="compare-grid">
+      <div class="compare-card">
+        <div class="compare-card-header">✅ Use useReducer quando...</div>
+        <div class="compare-card-body">
+          <ul>
+            <li class="use-item">Estado tem 3+ campos relacionados</li>
+            <li class="use-item">Múltiplas ações afetam o mesmo estado</li>
+            <li class="use-item">Próximo estado depende de vários campos</li>
+            <li class="use-item">Lógica complexa que merece ser testada isolada</li>
+            <li class="use-item">Quer histórico de ações (debug)</li>
+          </ul>
+        </div>
+      </div>
+      <div class="compare-card">
+        <div class="compare-card-header">→ Prefira useState quando...</div>
+        <div class="compare-card-body">
+          <ul>
+            <li class="avoid-item">Estado é um único valor primitivo</li>
+            <li class="avoid-item">Apenas 1-2 formas de atualizar</li>
+            <li class="avoid-item">Componentes pequenos e isolados</li>
+            <li class="avoid-item">Não há lógica condicional nas atualizações</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 4: PASSO A PASSO ═══ -->
+  <section class="section" id="passo-a-passo">
+    <div class="section-header">
+      <div class="section-number">04</div>
+      <h2 class="section-title">Passo a passo com TypeScript</h2>
+    </div>
+
+    <p class="prose">
+      O segredo de um reducer tipado corretamente é usar
+      <strong>discriminated unions</strong> para o tipo das ações. TypeScript
+      vai inferir automaticamente o tipo do <code>payload</code> dentro de cada
+      case do switch.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Defina a interface do estado</div>
+          <div class="step-desc">Modele todos os campos que o componente precisa gerenciar.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">TodoReducer.tsx — Passo 1</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// Estado de uma lista de tarefas
+interface TodoItem {
+  id: string
+  text: string
+  completed: boolean
+}
+
+interface TodoState {
+  items: TodoItem[]
+  filter: 'all' | 'active' | 'completed'
+  loading: boolean
+}</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Defina os tipos de ação como discriminated union</div>
+          <div class="step-desc">
+            Cada tipo de ação é um objeto distinto. TypeScript vai narrowing automático
+            dentro do switch — <code>action.payload</code> será tipado corretamente
+            em cada case.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">TodoReducer.tsx — Passo 2</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// Discriminated union — cada ação tem seu tipo e payload específico
+type TodoAction =
+  | { type: 'ADD_TODO'; payload: string }           // payload: texto da tarefa
+  | { type: 'TOGGLE_TODO'; payload: string }        // payload: id da tarefa
+  | { type: 'REMOVE_TODO'; payload: string }        // payload: id da tarefa
+  | { type: 'SET_FILTER'; payload: TodoState['filter'] }  // payload: novo filtro
+  | { type: 'CLEAR_COMPLETED' }                     // sem payload</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Escreva o reducer com switch/case</div>
+          <div class="step-desc">
+            Fora do componente. Cada case retorna um novo objeto de estado —
+            nunca mute o state atual.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">TodoReducer.tsx — Passo 3</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">function todoReducer(state: TodoState, action: TodoAction): TodoState {
+  switch (action.type) {
+    case 'ADD_TODO':
+      return {
+        ...state,
+        items: [
+          ...state.items,
+          {
+            id: crypto.randomUUID(),
+            text: action.payload,    // TypeScript sabe que payload é string aqui
+            completed: false,
+          },
+        ],
+      }
+
+    case 'TOGGLE_TODO':
+      return {
+        ...state,
+        items: state.items.map(item =>
+          item.id === action.payload    // TypeScript sabe que payload é string
+            ? { ...item, completed: !item.completed }
+            : item
+        ),
+      }
+
+    case 'REMOVE_TODO':
+      return {
+        ...state,
+        items: state.items.filter(item => item.id !== action.payload),
+      }
+
+    case 'SET_FILTER':
+      return { ...state, filter: action.payload }
+
+    case 'CLEAR_COMPLETED':
+      return {
+        ...state,
+        items: state.items.filter(item => !item.completed),
+      }
+
+    default:
+      return state
+  }
+}</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Use no componente</div>
+          <div class="step-desc">
+            <code>useReducer</code> retorna o estado atual e a função dispatch.
+            O dispatch é estável — não muda entre renders, pode ser passado sem useMemo.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">TodoReducer.tsx — Passo 4</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">const initialState: TodoState = {
+  items: [],
+  filter: 'all',
+  loading: false,
+}
+
+export function TodoApp() {
+  const [state, dispatch] = useReducer(todoReducer, initialState)
+
+  const handleAdd = (text: string) => {
+    dispatch({ type: 'ADD_TODO', payload: text })
+  }
+
+  const handleToggle = (id: string) => {
+    dispatch({ type: 'TOGGLE_TODO', payload: id })
+  }
+
+  const visibleItems = state.items.filter(item => {
+    if (state.filter === 'active') return !item.completed
+    if (state.filter === 'completed') return item.completed
+    return true
+  })
+
+  return (
+    &lt;div&gt;
+      {/* ... UI usando state e dispatch ... */}
+    &lt;/div&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 5: EXEMPLO BÁSICO ═══ -->
+  <section class="section" id="ex-basico">
+    <div class="section-header">
+      <div class="section-number">05</div>
+      <h2 class="section-title">Exemplo 1 — Contador avançado</h2>
+    </div>
+
+    <p class="prose">
+      Um contador que vai além do básico: suporta incremento por valor
+      customizado, reset para valor específico e bounds (mínimo/máximo).
+      Mostra como o reducer lida elegantemente com lógica condicional.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/components/AdvancedCounter.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface CounterState {
+  value: number
+  min: number
+  max: number
+  step: number
+}
+
+type CounterAction =
+  | { type: 'INCREMENT' }
+  | { type: 'DECREMENT' }
+  | { type: 'RESET' }
+  | { type: 'SET_STEP'; payload: number }
+  | { type: 'SET_VALUE'; payload: number }
+
+// ─── Reducer ─────────────────────────────────────────────
+function counterReducer(state: CounterState, action: CounterAction): CounterState {
+  switch (action.type) {
+    case 'INCREMENT':
+      return {
+        ...state,
+        // Respeita o limite máximo
+        value: Math.min(state.value + state.step, state.max),
+      }
+    case 'DECREMENT':
+      return {
+        ...state,
+        // Respeita o limite mínimo
+        value: Math.max(state.value - state.step, state.min),
+      }
+    case 'RESET':
+      return { ...state, value: 0 }
+    case 'SET_STEP':
+      return { ...state, step: Math.max(1, action.payload) }
+    case 'SET_VALUE':
+      return {
+        ...state,
+        value: Math.min(Math.max(action.payload, state.min), state.max),
+      }
+    default:
+      return state
+  }
+}
+
+const initialState: CounterState = {
+  value: 0,
+  min: -10,
+  max: 10,
+  step: 1,
+}
+
+// ─── Componente ───────────────────────────────────────────
+export function AdvancedCounter() {
+  const [state, dispatch] = useReducer(counterReducer, initialState)
+
+  const isAtMin = state.value === state.min
+  const isAtMax = state.value === state.max
+
+  return (
+    &lt;div&gt;
+      &lt;p&gt;Valor: {state.value} (step: {state.step})&lt;/p&gt;
+
+      &lt;button
+        onClick={() => dispatch({ type: 'DECREMENT' })}
+        disabled={isAtMin}
+      &gt;
+        - {state.step}
+      &lt;/button&gt;
+
+      &lt;button
+        onClick={() => dispatch({ type: 'INCREMENT' })}
+        disabled={isAtMax}
+      &gt;
+        + {state.step}
+      &lt;/button&gt;
+
+      &lt;button onClick={() => dispatch({ type: 'RESET' })}&gt;
+        Reset
+      &lt;/button&gt;
+
+      &lt;input
+        type="number"
+        value={state.step}
+        min={1}
+        onChange={e => dispatch({
+          type: 'SET_STEP',
+          payload: Number(e.target.value),
+        })}
+      /&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 6: EXEMPLO MÉDIO ═══ -->
+  <section class="section" id="ex-medio">
+    <div class="section-header">
+      <div class="section-number">06</div>
+      <h2 class="section-title">Exemplo 2 — Lista de tarefas</h2>
+    </div>
+
+    <p class="prose">
+      O exemplo clássico de useReducer em aplicações reais. Um estado com
+      múltiplos campos, múltiplas ações e lógica que seria difícil de
+      manter com vários <code>useState</code> separados.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/components/TodoList.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer, useRef } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface Todo {
+  id: string
+  text: string
+  completed: boolean
+  createdAt: Date
+}
+
+interface TodoState {
+  todos: Todo[]
+  filter: 'all' | 'active' | 'completed'
+}
+
+type TodoAction =
+  | { type: 'ADD'; payload: string }
+  | { type: 'TOGGLE'; payload: string }
+  | { type: 'DELETE'; payload: string }
+  | { type: 'EDIT'; payload: { id: string; text: string } }
+  | { type: 'CLEAR_COMPLETED' }
+  | { type: 'SET_FILTER'; payload: TodoState['filter'] }
+
+// ─── Reducer ─────────────────────────────────────────────
+function todosReducer(state: TodoState, action: TodoAction): TodoState {
+  switch (action.type) {
+    case 'ADD':
+      if (!action.payload.trim()) return state  // Ignora texto vazio
+      return {
+        ...state,
+        todos: [
+          {
+            id: crypto.randomUUID(),
+            text: action.payload.trim(),
+            completed: false,
+            createdAt: new Date(),
+          },
+          ...state.todos,
+        ],
+      }
+
+    case 'TOGGLE':
+      return {
+        ...state,
+        todos: state.todos.map(todo =>
+          todo.id === action.payload
+            ? { ...todo, completed: !todo.completed }
+            : todo
+        ),
+      }
+
+    case 'DELETE':
+      return {
+        ...state,
+        todos: state.todos.filter(todo => todo.id !== action.payload),
+      }
+
+    case 'EDIT':
+      return {
+        ...state,
+        todos: state.todos.map(todo =>
+          todo.id === action.payload.id
+            ? { ...todo, text: action.payload.text }
+            : todo
+        ),
+      }
+
+    case 'CLEAR_COMPLETED':
+      return {
+        ...state,
+        todos: state.todos.filter(todo => !todo.completed),
+      }
+
+    case 'SET_FILTER':
+      return { ...state, filter: action.payload }
+
+    default:
+      return state
+  }
+}
+
+// ─── Componente ───────────────────────────────────────────
+export function TodoList() {
+  const [state, dispatch] = useReducer(todosReducer, { todos: [], filter: 'all' })
+  const inputRef = useRef&lt;HTMLInputElement&gt;(null)
+
+  const handleAdd = () => {
+    if (inputRef.current) {
+      dispatch({ type: 'ADD', payload: inputRef.current.value })
+      inputRef.current.value = ''
+      inputRef.current.focus()
+    }
+  }
+
+  const visibleTodos = state.todos.filter(todo => {
+    if (state.filter === 'active') return !todo.completed
+    if (state.filter === 'completed') return todo.completed
+    return true
+  })
+
+  const completedCount = state.todos.filter(t => t.completed).length
+
+  return (
+    &lt;div&gt;
+      {/* Input de nova tarefa */}
+      &lt;div&gt;
+        &lt;input ref={inputRef} placeholder="Nova tarefa..." /&gt;
+        &lt;button onClick={handleAdd}&gt;Adicionar&lt;/button&gt;
+      &lt;/div&gt;
+
+      {/* Filtros */}
+      &lt;div&gt;
+        {(['all', 'active', 'completed'] as const).map(f => (
+          &lt;button
+            key={f}
+            onClick={() => dispatch({ type: 'SET_FILTER', payload: f })}
+            style={{ fontWeight: state.filter === f ? 'bold' : 'normal' }}
+          &gt;
+            {f}
+          &lt;/button&gt;
+        ))}
+      &lt;/div&gt;
+
+      {/* Lista */}
+      &lt;ul&gt;
+        {visibleTodos.map(todo => (
+          &lt;li key={todo.id}&gt;
+            &lt;input
+              type="checkbox"
+              checked={todo.completed}
+              onChange={() => dispatch({ type: 'TOGGLE', payload: todo.id })}
+            /&gt;
+            &lt;span style={{ textDecoration: todo.completed ? 'line-through' : 'none' }}&gt;
+              {todo.text}
+            &lt;/span&gt;
+            &lt;button onClick={() => dispatch({ type: 'DELETE', payload: todo.id })}&gt;
+              ✕
+            &lt;/button&gt;
+          &lt;/li&gt;
+        ))}
+      &lt;/ul&gt;
+
+      {/* Rodapé */}
+      {completedCount &gt; 0 &amp;&amp; (
+        &lt;button onClick={() => dispatch({ type: 'CLEAR_COMPLETED' })}&gt;
+          Limpar {completedCount} concluída(s)
+        &lt;/button&gt;
+      )}
+    &lt;/div&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 7: EXEMPLO INTERMEDIÁRIO ═══ -->
+  <section class="section" id="ex-inter">
+    <div class="section-header">
+      <div class="section-number">07</div>
+      <h2 class="section-title">Exemplo 3 — Formulário com validação</h2>
+    </div>
+
+    <p class="prose">
+      Formulários com validação são o caso de uso ideal para useReducer:
+      campos inter-relacionados, erros por campo, estados de loading e
+      submit. Tentar gerenciar isso com múltiplos <code>useState</code> resulta
+      em código frágil e difícil de manter.
+    </p>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/components/RegisterForm.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { useReducer } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface FormFields {
+  name: string
+  email: string
+  password: string
+  confirmPassword: string
+}
+
+type FormErrors = Partial&lt;Record&lt;keyof FormFields, string&gt;&gt;
+
+interface FormState {
+  fields: FormFields
+  errors: FormErrors
+  touched: Partial&lt;Record&lt;keyof FormFields, boolean&gt;&gt;
+  submitting: boolean
+  submitted: boolean
+}
+
+type FormAction =
+  | { type: 'CHANGE'; payload: { field: keyof FormFields; value: string } }
+  | { type: 'BLUR'; payload: keyof FormFields }
+  | { type: 'SUBMIT_START' }
+  | { type: 'SUBMIT_SUCCESS' }
+  | { type: 'SUBMIT_ERROR'; payload: string }
+
+// ─── Validação (pura, fora do reducer) ───────────────────
+function validate(fields: FormFields): FormErrors {
+  const errors: FormErrors = {}
+
+  if (!fields.name.trim()) {
+    errors.name = 'Nome é obrigatório'
+  }
+
+  if (!fields.email.includes('@')) {
+    errors.email = 'E-mail inválido'
+  }
+
+  if (fields.password.length &lt; 8) {
+    errors.password = 'Senha deve ter ao menos 8 caracteres'
+  }
+
+  if (fields.password !== fields.confirmPassword) {
+    errors.confirmPassword = 'As senhas não coincidem'
+  }
+
+  return errors
+}
+
+// ─── Reducer ─────────────────────────────────────────────
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'CHANGE': {
+      const updatedFields = {
+        ...state.fields,
+        [action.payload.field]: action.payload.value,
+      }
+      return {
+        ...state,
+        fields: updatedFields,
+        // Re-valida somente os campos tocados
+        errors: validate(updatedFields),
+      }
+    }
+
+    case 'BLUR':
+      return {
+        ...state,
+        touched: { ...state.touched, [action.payload]: true },
+        errors: validate(state.fields),
+      }
+
+    case 'SUBMIT_START':
+      return {
+        ...state,
+        submitting: true,
+        // Marca todos os campos como tocados para mostrar todos os erros
+        touched: { name: true, email: true, password: true, confirmPassword: true },
+        errors: validate(state.fields),
+      }
+
+    case 'SUBMIT_SUCCESS':
+      return { ...state, submitting: false, submitted: true }
+
+    case 'SUBMIT_ERROR':
+      return { ...state, submitting: false }
+
+    default:
+      return state
+  }
+}
+
+// ─── Estado inicial ───────────────────────────────────────
+const initialFormState: FormState = {
+  fields: { name: '', email: '', password: '', confirmPassword: '' },
+  errors: {},
+  touched: {},
+  submitting: false,
+  submitted: false,
+}
+
+// ─── Componente ───────────────────────────────────────────
+export function RegisterForm() {
+  const [state, dispatch] = useReducer(formReducer, initialFormState)
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    dispatch({ type: 'SUBMIT_START' })
+
+    const errors = validate(state.fields)
+    if (Object.keys(errors).length &gt; 0) return
+
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000)) // Simula API
+      dispatch({ type: 'SUBMIT_SUCCESS' })
+    } catch {
+      dispatch({ type: 'SUBMIT_ERROR', payload: 'Erro ao cadastrar' })
+    }
+  }
+
+  if (state.submitted) {
+    return &lt;p&gt;Cadastro realizado com sucesso!&lt;/p&gt;
+  }
+
+  return (
+    &lt;form onSubmit={handleSubmit}&gt;
+      {(['name', 'email', 'password', 'confirmPassword'] as const).map(field => (
+        &lt;div key={field}&gt;
+          &lt;input
+            type={field.includes('assword') ? 'password' : 'text'}
+            placeholder={field}
+            value={state.fields[field]}
+            onChange={e => dispatch({
+              type: 'CHANGE',
+              payload: { field, value: e.target.value },
+            })}
+            onBlur={() => dispatch({ type: 'BLUR', payload: field })}
+          /&gt;
+          {state.touched[field] &amp;&amp; state.errors[field] &amp;&amp; (
+            &lt;span style={{ color: 'red' }}&gt;{state.errors[field]}&lt;/span&gt;
+          )}
+        &lt;/div&gt;
+      ))}
+      &lt;button type="submit" disabled={state.submitting}&gt;
+        {state.submitting ? 'Cadastrando...' : 'Cadastrar'}
+      &lt;/button&gt;
+    &lt;/form&gt;
+  )
+}</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 8: CONTEXT + REDUCER ═══ -->
+  <section class="section" id="context-reducer">
+    <div class="section-header">
+      <div class="section-number">08</div>
+      <h2 class="section-title">Context + Reducer</h2>
+    </div>
+
+    <p class="prose">
+      A combinação mais poderosa do ecossistema React nativo: Context distribui
+      o estado pela árvore, Reducer centraliza e formaliza a lógica de mutação.
+      É o padrão que Redux implementa, agora sem dependências externas.
+    </p>
+
+    <div class="callout purple">
+      <span class="callout-icon">💡</span>
+      <div>
+        O pattern: exponha o <strong>state</strong> via um contexto e o <strong>dispatch</strong>
+        via outro contexto separado. Assim, componentes que só leem não re-renderizam
+        quando o dispatch muda (o que nunca acontece de qualquer forma).
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">src/contexts/StoreContext.tsx</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { createContext, useContext, useReducer } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface AppState {
+  user: { name: string; role: string } | null
+  theme: 'light' | 'dark'
+  notifications: number
+}
+
+type AppAction =
+  | { type: 'LOGIN'; payload: AppState['user'] }
+  | { type: 'LOGOUT' }
+  | { type: 'TOGGLE_THEME' }
+  | { type: 'ADD_NOTIFICATION' }
+  | { type: 'CLEAR_NOTIFICATIONS' }
+
+// ─── Reducer ─────────────────────────────────────────────
+function appReducer(state: AppState, action: AppAction): AppState {
+  switch (action.type) {
+    case 'LOGIN':
+      return { ...state, user: action.payload }
+    case 'LOGOUT':
+      return { ...state, user: null }
+    case 'TOGGLE_THEME':
+      return { ...state, theme: state.theme === 'dark' ? 'light' : 'dark' }
+    case 'ADD_NOTIFICATION':
+      return { ...state, notifications: state.notifications + 1 }
+    case 'CLEAR_NOTIFICATIONS':
+      return { ...state, notifications: 0 }
+    default:
+      return state
+  }
+}
+
+// ─── Dois contextos separados ─────────────────────────────
+// State e dispatch em contextos separados para otimizar re-renders
+const StateContext = createContext&lt;AppState | null&gt;(null)
+const DispatchContext = createContext&lt;React.Dispatch&lt;AppAction&gt; | null&gt;(null)
+
+// ─── Provider ────────────────────────────────────────────
+const initialState: AppState = {
+  user: null,
+  theme: 'dark',
+  notifications: 0,
+}
+
+export function AppStoreProvider({ children }: { children: React.ReactNode }) {
+  const [state, dispatch] = useReducer(appReducer, initialState)
+
+  return (
+    &lt;StateContext.Provider value={state}&gt;
+      &lt;DispatchContext.Provider value={dispatch}&gt;
+        {children}
+      &lt;/DispatchContext.Provider&gt;
+    &lt;/StateContext.Provider&gt;
+  )
+}
+
+// ─── Hooks públicos ───────────────────────────────────────
+export function useAppState(): AppState {
+  const ctx = useContext(StateContext)
+  if (!ctx) throw new Error('useAppState fora do AppStoreProvider')
+  return ctx
+}
+
+export function useAppDispatch(): React.Dispatch&lt;AppAction&gt; {
+  const ctx = useContext(DispatchContext)
+  if (!ctx) throw new Error('useAppDispatch fora do AppStoreProvider')
+  return ctx
+}
+
+// ─── Uso nos componentes ──────────────────────────────────
+// const { user, theme } = useAppState()
+// const dispatch = useAppDispatch()
+// dispatch({ type: 'TOGGLE_THEME' })</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ SEÇÃO 9: BOAS PRÁTICAS ═══ -->
+  <section class="section" id="boas-praticas">
+    <div class="section-header">
+      <div class="section-number">09</div>
+      <h2 class="section-title">Boas práticas</h2>
+    </div>
+
+    <p class="prose">
+      Padrões que separam um reducer robusto de um que vai gerar bugs difíceis
+      de rastrear.
+    </p>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div class="step-content">
+          <div class="step-title">Nunca mute o state — sempre retorne um novo objeto</div>
+          <div class="step-desc">
+            React detecta mudanças por referência. Mutar o state diretamente
+            não dispara re-render e cria bugs silenciosos.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">mutação vs imutabilidade</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// ❌ ERRADO — muta o state diretamente
+case 'ADD_ITEM':
+  state.items.push(action.payload)  // Mutação direta!
+  return state                       // Mesma referência — React não detecta mudança
+
+// ✅ CORRETO — retorna novo objeto
+case 'ADD_ITEM':
+  return {
+    ...state,
+    items: [...state.items, action.payload],  // Novo array
+  }</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">2</div>
+        <div class="step-content">
+          <div class="step-title">Mantenha o reducer puro — sem efeitos colaterais</div>
+          <div class="step-desc">
+            Sem chamadas de API, sem setTimeout, sem console.log no reducer.
+            Efeitos colaterais pertencem ao componente (useEffect) ou a middleware.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">3</div>
+        <div class="step-content">
+          <div class="step-title">Sempre inclua o case default</div>
+          <div class="step-desc">
+            O default deve retornar o state atual. Sem ele, ações desconhecidas
+            retornam <code>undefined</code> e quebram o componente.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">4</div>
+        <div class="step-content">
+          <div class="step-title">Use Action Creators para encapsular a construção das ações</div>
+          <div class="step-desc">
+            Funções que retornam o objeto de ação. Evitam erros de digitação nos types
+            e centralizam a construção das ações.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">action-creators.ts</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">// Action Creators — funções que constroem as ações
+export const todoActions = {
+  add: (text: string) => ({ type: 'ADD' as const, payload: text }),
+  toggle: (id: string) => ({ type: 'TOGGLE' as const, payload: id }),
+  remove: (id: string) => ({ type: 'DELETE' as const, payload: id }),
+  clearCompleted: () => ({ type: 'CLEAR_COMPLETED' as const }),
+}
+
+// Uso no componente — mais legível e refactor-safe:
+dispatch(todoActions.add('Nova tarefa'))
+dispatch(todoActions.toggle(todo.id))
+
+// Em vez de:
+dispatch({ type: 'ADD', payload: 'Nova tarefa' })  // string literal propensa a typo</code></pre>
+    </div>
+
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">5</div>
+        <div class="step-content">
+          <div class="step-title">Teste o reducer diretamente — sem renderização</div>
+          <div class="step-desc">
+            Por ser uma função pura, o reducer pode ser testado com simples chamadas de função.
+            É uma das maiores vantagens do padrão.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="code-block">
+      <div class="code-header">
+        <span class="code-filename">todoReducer.test.ts</span>
+        <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+      </div>
+      <pre><code class="language-typescript">import { describe, it, expect } from 'vitest'
+import { todoReducer } from './todoReducer'
+
+describe('todoReducer', () => {
+  const initial = { todos: [], filter: 'all' as const }
+
+  it('ADD adiciona uma tarefa', () => {
+    const result = todoReducer(initial, { type: 'ADD', payload: 'Estudar React' })
+    expect(result.todos).toHaveLength(1)
+    expect(result.todos[0].text).toBe('Estudar React')
+    expect(result.todos[0].completed).toBe(false)
+  })
+
+  it('ADD ignora texto vazio', () => {
+    const result = todoReducer(initial, { type: 'ADD', payload: '   ' })
+    expect(result.todos).toHaveLength(0)
+  })
+
+  it('TOGGLE inverte o estado de completed', () => {
+    const withTodo = todoReducer(initial, { type: 'ADD', payload: 'Tarefa' })
+    const toggled = todoReducer(withTodo, {
+      type: 'TOGGLE',
+      payload: withTodo.todos[0].id,
+    })
+    expect(toggled.todos[0].completed).toBe(true)
+  })
+})
+// Sem renderização, sem mocks de React — testes rápidos e precisos</code></pre>
+    </div>
+  </section>
+
+  <hr class="divider" />
+
+  <!-- ═══ EXERCÍCIOS ═══ -->
+  <section class="section" id="exercicios">
+    <div class="section-header">
+      <div class="section-number">10</div>
+      <h2 class="section-title">Exercícios</h2>
+    </div>
+
+    <p class="prose">
+      Três exercícios com progressão de dificuldade. Foque em modelar bem
+      o estado e as ações antes de escrever o reducer.
+    </p>
+
+    <!-- Exercício 1 -->
+    <div class="exercise" id="ex1">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-basic">Básico</span>
+        <span class="exercise-title">Exercício 1 — Semáforo</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Implemente um semáforo que cicla entre os estados: verde → amarelo → vermelho → verde.
+          O único evento é um clique que avança para o próximo estado.
+          O desafio é modelar a máquina de estados com useReducer.
+        </p>
+        <ul class="exercise-tasks">
+          <li>O estado deve ser do tipo <code>'green' | 'yellow' | 'red'</code></li>
+          <li>A única ação é <code>NEXT</code> — avança para o próximo estado no ciclo</li>
+          <li>Exiba o semáforo visualmente (círculos coloridos) e um botão "Avançar"</li>
+          <li>Mostre uma mensagem associada a cada estado: "Siga", "Atenção", "Pare"</li>
+          <li><strong>Extra:</strong> adicione auto-avanço com <code>useEffect</code> e <code>setTimeout</code></li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// TrafficLight.tsx</div>
+          <textarea class="workspace-editor" placeholder="// Dica: modele a transição como uma constante:
+// const nextState = { green: 'yellow', yellow: 'red', red: 'green' }
+//
+// No reducer:
+// case 'NEXT': return nextState[state]"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">
+          👁 Ver solução
+        </button>
+
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — TrafficLight.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-typescript">import { useReducer, useEffect } from 'react'
+
+type LightColor = 'green' | 'yellow' | 'red'
+type LightAction = { type: 'NEXT' }
+
+const nextColor: Record&lt;LightColor, LightColor&gt; = {
+  green: 'yellow',
+  yellow: 'red',
+  red: 'green',
+}
+
+const messages: Record&lt;LightColor, string&gt; = {
+  green: '✅ Siga',
+  yellow: '⚠️ Atenção',
+  red: '🛑 Pare',
+}
+
+const durations: Record&lt;LightColor, number&gt; = {
+  green: 3000,
+  yellow: 1000,
+  red: 2000,
+}
+
+function lightReducer(state: LightColor, action: LightAction): LightColor {
+  switch (action.type) {
+    case 'NEXT':
+      return nextColor[state]
+    default:
+      return state
+  }
+}
+
+export function TrafficLight() {
+  const [color, dispatch] = useReducer(lightReducer, 'green')
+
+  // Auto-avanço baseado na duração de cada estado
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      dispatch({ type: 'NEXT' })
+    }, durations[color])
+
+    return () => clearTimeout(timer)
+  }, [color])
+
+  return (
+    &lt;div style={{ textAlign: 'center' }}&gt;
+      {/* Semáforo visual */}
+      &lt;div style={{
+        background: '#1c2333',
+        border: '2px solid #30363d',
+        borderRadius: '12px',
+        padding: '20px',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        gap: '12px',
+      }}&gt;
+        {(['red', 'yellow', 'green'] as const).map(c => (
+          &lt;div
+            key={c}
+            style={{
+              width: 60,
+              height: 60,
+              borderRadius: '50%',
+              background: color === c
+                ? (c === 'green' ? '#34d399' : c === 'yellow' ? '#fbbf24' : '#f87171')
+                : '#2d3748',
+              transition: 'background 0.3s',
+            }}
+          /&gt;
+        ))}
+      &lt;/div&gt;
+
+      &lt;p style={{ fontSize: '1.2rem', marginTop: '16px' }}&gt;
+        {messages[color]}
+      &lt;/p&gt;
+
+      &lt;button onClick={() => dispatch({ type: 'NEXT' })}&gt;
+        Avançar manualmente
+      &lt;/button&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 2 -->
+    <div class="exercise" id="ex2">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-medium">Médio</span>
+        <span class="exercise-title">Exercício 2 — Carrinho Redux-like</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Implemente um carrinho de compras usando useReducer. O estado deve
+          controlar os itens, o total calculado e um cupom de desconto.
+          Este exercício trabalha a modelagem de estado derivado dentro do reducer.
+        </p>
+        <ul class="exercise-tasks">
+          <li>Estado: <code>items: CartItem[]</code>, <code>coupon: string | null</code>, <code>discount: number</code> (0-1)</li>
+          <li>Ações: <code>ADD_ITEM</code>, <code>REMOVE_ITEM</code>, <code>UPDATE_QUANTITY</code>, <code>APPLY_COUPON</code>, <code>CLEAR_CART</code></li>
+          <li>Calcule <code>subtotal</code>, <code>discountAmount</code> e <code>total</code> via <code>useMemo</code> no componente (não no state)</li>
+          <li><code>APPLY_COUPON</code> deve validar o código: "REACT10" = 10% off, "REACT20" = 20% off</li>
+          <li><code>UPDATE_QUANTITY</code> com <code>quantity = 0</code> deve remover o item</li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// CartReducer.tsx</div>
+          <textarea class="workspace-editor" placeholder="// Interface sugerida:
+// interface CartItem { id: string; name: string; price: number; quantity: number }
+// interface CartState { items: CartItem[]; coupon: string | null; discount: number }
+//
+// Os cupons válidos podem ser uma constante:
+// const COUPONS: Record&lt;string, number&gt; = { 'REACT10': 0.1, 'REACT20': 0.2 }"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">
+          👁 Ver solução
+        </button>
+
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — CartReducer.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-typescript">import { useReducer, useMemo } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface CartItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+}
+
+interface CartState {
+  items: CartItem[]
+  coupon: string | null
+  discount: number
+}
+
+type CartAction =
+  | { type: 'ADD_ITEM'; payload: Omit&lt;CartItem, 'quantity'&gt; }
+  | { type: 'REMOVE_ITEM'; payload: string }
+  | { type: 'UPDATE_QUANTITY'; payload: { id: string; quantity: number } }
+  | { type: 'APPLY_COUPON'; payload: string }
+  | { type: 'CLEAR_CART' }
+
+// ─── Cupons válidos ───────────────────────────────────────
+const COUPONS: Record&lt;string, number&gt; = {
+  'REACT10': 0.1,
+  'REACT20': 0.2,
+}
+
+// ─── Reducer ─────────────────────────────────────────────
+function cartReducer(state: CartState, action: CartAction): CartState {
+  switch (action.type) {
+    case 'ADD_ITEM': {
+      const existing = state.items.find(i => i.id === action.payload.id)
+      if (existing) {
+        return {
+          ...state,
+          items: state.items.map(i =>
+            i.id === action.payload.id
+              ? { ...i, quantity: i.quantity + 1 }
+              : i
+          ),
+        }
+      }
+      return {
+        ...state,
+        items: [...state.items, { ...action.payload, quantity: 1 }],
+      }
+    }
+
+    case 'REMOVE_ITEM':
+      return {
+        ...state,
+        items: state.items.filter(i => i.id !== action.payload),
+      }
+
+    case 'UPDATE_QUANTITY': {
+      const { id, quantity } = action.payload
+      if (quantity &lt;= 0) {
+        // Quantidade zero remove o item
+        return { ...state, items: state.items.filter(i => i.id !== id) }
+      }
+      return {
+        ...state,
+        items: state.items.map(i =>
+          i.id === id ? { ...i, quantity } : i
+        ),
+      }
+    }
+
+    case 'APPLY_COUPON': {
+      const discount = COUPONS[action.payload.toUpperCase()] ?? 0
+      return {
+        ...state,
+        coupon: discount &gt; 0 ? action.payload : null,
+        discount,
+      }
+    }
+
+    case 'CLEAR_CART':
+      return { items: [], coupon: null, discount: 0 }
+
+    default:
+      return state
+  }
+}
+
+// ─── Componente ───────────────────────────────────────────
+export function Cart() {
+  const [state, dispatch] = useReducer(cartReducer, {
+    items: [],
+    coupon: null,
+    discount: 0,
+  })
+
+  // Estado derivado calculado fora do reducer
+  const summary = useMemo(() => {
+    const subtotal = state.items.reduce(
+      (sum, item) => sum + item.price * item.quantity, 0
+    )
+    const discountAmount = subtotal * state.discount
+    return {
+      subtotal,
+      discountAmount,
+      total: subtotal - discountAmount,
+    }
+  }, [state.items, state.discount])
+
+  return (
+    &lt;div&gt;
+      {state.items.map(item => (
+        &lt;div key={item.id}&gt;
+          &lt;span&gt;{item.name}&lt;/span&gt;
+          &lt;input
+            type="number"
+            value={item.quantity}
+            min={0}
+            onChange={e => dispatch({
+              type: 'UPDATE_QUANTITY',
+              payload: { id: item.id, quantity: Number(e.target.value) },
+            })}
+          /&gt;
+          &lt;span&gt;R$ {(item.price * item.quantity).toFixed(2)}&lt;/span&gt;
+        &lt;/div&gt;
+      ))}
+
+      &lt;p&gt;Subtotal: R$ {summary.subtotal.toFixed(2)}&lt;/p&gt;
+      {state.discount &gt; 0 &amp;&amp; (
+        &lt;p&gt;Desconto ({state.discount * 100}%): -R$ {summary.discountAmount.toFixed(2)}&lt;/p&gt;
+      )}
+      &lt;p&gt;&lt;strong&gt;Total: R$ {summary.total.toFixed(2)}&lt;/strong&gt;&lt;/p&gt;
+    &lt;/div&gt;
+  )
+}</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Exercício 3 -->
+    <div class="exercise" id="ex3">
+      <div class="exercise-header">
+        <span class="exercise-badge badge-inter">Intermediário</span>
+        <span class="exercise-title">Exercício 3 — Wizard de cadastro</span>
+      </div>
+      <div class="exercise-body">
+        <p class="exercise-desc">
+          Um wizard multi-step é uma máquina de estados clássica. O estado controla
+          o passo atual, os dados de cada etapa e a validação. Este exercício
+          trabalha o padrão de estado agregado e navegação entre etapas.
+        </p>
+        <ul class="exercise-tasks">
+          <li>O wizard tem 3 etapas: Dados pessoais → Endereço → Confirmação</li>
+          <li>Estado: <code>step: 1 | 2 | 3</code>, <code>data: { personal, address }</code>, <code>completed: boolean</code></li>
+          <li>Ações: <code>NEXT</code> (com payload dos dados da etapa atual), <code>BACK</code>, <code>SUBMIT</code></li>
+          <li><code>NEXT</code> só avança se os dados da etapa estiverem válidos</li>
+          <li>A etapa 3 (Confirmação) exibe um resumo com todos os dados coletados</li>
+          <li><strong>Extra:</strong> adicione uma barra de progresso visual com base no <code>step</code></li>
+        </ul>
+
+        <div class="exercise-workspace">
+          <div class="workspace-label">// RegisterWizard.tsx</div>
+          <textarea class="workspace-editor" placeholder="// Estado sugerido:
+// interface WizardState {
+//   step: 1 | 2 | 3
+//   data: {
+//     personal: { name: string; email: string; phone: string }
+//     address: { street: string; city: string; zipCode: string }
+//   }
+//   completed: boolean
+// }
+//
+// Dica: o NEXT pode receber um payload genérico que será mergeado em data"></textarea>
+        </div>
+
+        <button class="solution-toggle" onclick="toggleSolution(this)">
+          👁 Ver solução
+        </button>
+
+        <div class="solution-block">
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">Solução — RegisterWizard.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code class="language-typescript">import { useReducer } from 'react'
+
+// ─── Tipos ───────────────────────────────────────────────
+interface PersonalData {
+  name: string
+  email: string
+  phone: string
+}
+
+interface AddressData {
+  street: string
+  city: string
+  zipCode: string
+}
+
+interface WizardState {
+  step: 1 | 2 | 3
+  data: {
+    personal: PersonalData
+    address: AddressData
+  }
+  completed: boolean
+}
+
+type WizardAction =
+  | { type: 'NEXT_PERSONAL'; payload: PersonalData }
+  | { type: 'NEXT_ADDRESS'; payload: AddressData }
+  | { type: 'BACK' }
+  | { type: 'SUBMIT' }
+
+// ─── Validações ───────────────────────────────────────────
+function isPersonalValid(data: PersonalData): boolean {
+  return data.name.trim().length &gt; 0
+    &amp;&amp; data.email.includes('@')
+    &amp;&amp; data.phone.replace(/\D/g, '').length &gt;= 10
+}
+
+function isAddressValid(data: AddressData): boolean {
+  return data.street.trim().length &gt; 0
+    &amp;&amp; data.city.trim().length &gt; 0
+    &amp;&amp; data.zipCode.replace(/\D/g, '').length === 8
+}
+
+// ─── Reducer ─────────────────────────────────────────────
+function wizardReducer(state: WizardState, action: WizardAction): WizardState {
+  switch (action.type) {
+    case 'NEXT_PERSONAL':
+      if (!isPersonalValid(action.payload)) return state  // Bloqueia se inválido
+      return {
+        ...state,
+        step: 2,
+        data: { ...state.data, personal: action.payload },
+      }
+
+    case 'NEXT_ADDRESS':
+      if (!isAddressValid(action.payload)) return state
+      return {
+        ...state,
+        step: 3,
+        data: { ...state.data, address: action.payload },
+      }
+
+    case 'BACK':
+      return {
+        ...state,
+        step: state.step &gt; 1 ? ((state.step - 1) as 1 | 2 | 3) : state.step,
+      }
+
+    case 'SUBMIT':
+      return { ...state, completed: true }
+
+    default:
+      return state
+  }
+}
+
+// ─── Estado inicial ───────────────────────────────────────
+const initialWizardState: WizardState = {
+  step: 1,
+  data: {
+    personal: { name: '', email: '', phone: '' },
+    address: { street: '', city: '', zipCode: '' },
+  },
+  completed: false,
+}
+
+// ─── Componente ───────────────────────────────────────────
+export function RegisterWizard() {
+  const [state, dispatch] = useReducer(wizardReducer, initialWizardState)
+
+  if (state.completed) {
+    return &lt;p&gt;Cadastro concluído! Bem-vindo, {state.data.personal.name}!&lt;/p&gt;
+  }
+
+  return (
+    &lt;div&gt;
+      {/* Barra de progresso */}
+      &lt;div style={{ display: 'flex', gap: '4px', marginBottom: '24px' }}&gt;
+        {[1, 2, 3].map(s => (
+          &lt;div key={s} style={{
+            flex: 1, height: '4px', borderRadius: '2px',
+            background: s &lt;= state.step ? '#34d399' : '#30363d',
+          }} /&gt;
+        ))}
+      &lt;/div&gt;
+
+      {/* Etapa 1: Dados pessoais */}
+      {state.step === 1 &amp;&amp; (
+        &lt;Step1 onNext={data => dispatch({ type: 'NEXT_PERSONAL', payload: data })} /&gt;
+      )}
+
+      {/* Etapa 2: Endereço */}
+      {state.step === 2 &amp;&amp; (
+        &lt;Step2
+          onNext={data => dispatch({ type: 'NEXT_ADDRESS', payload: data })}
+          onBack={() => dispatch({ type: 'BACK' })}
+        /&gt;
+      )}
+
+      {/* Etapa 3: Confirmação */}
+      {state.step === 3 &amp;&amp; (
+        &lt;div&gt;
+          &lt;h3&gt;Confirme seus dados&lt;/h3&gt;
+          &lt;p&gt;Nome: {state.data.personal.name}&lt;/p&gt;
+          &lt;p&gt;E-mail: {state.data.personal.email}&lt;/p&gt;
+          &lt;p&gt;Endereço: {state.data.address.street}, {state.data.address.city}&lt;/p&gt;
+          &lt;button onClick={() => dispatch({ type: 'BACK' })}&gt;Voltar&lt;/button&gt;
+          &lt;button onClick={() => dispatch({ type: 'SUBMIT' })}&gt;Confirmar&lt;/button&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/div&gt;
+  )
+}
+
+// (Step1 e Step2 são componentes com seus próprios formulários locais)</code></pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ═══ NAV FOOTER ═══ -->
   <div class="nav-footer">
     <a href="useContext.html" class="nav-link prev">← Módulo 01: useContext</a>
     <a href="index.html" class="nav-link">Início</a>
