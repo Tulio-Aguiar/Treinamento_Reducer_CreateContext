@@ -1,6 +1,6 @@
-import { AuthProvider } from "../AuthContext/AuthContext";
-import { ThemeProvider } from "../../ThemeContext";
-import { LanguageProvider } from "../LanguageContext/LanguageContext";
+import AuthProvider from "../AuthContext/AuthContext";
+import ThemeProvider from "../../ThemeContext";
+import LanguageProvider from "../LanguageContext/LanguageContext";
 
 interface AppProviderProps {
   children: React.ReactNode;
