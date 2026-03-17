@@ -1,8 +1,5 @@
 {
-  "buildCommand": null,
+  "outputDirectory": "dist",
   "framework": null,
-  "installCommand": null,
-  "rewrites": [
-    { "source": "/(.*)", "destination": "/docs/$1" }
-  ]
+  "installCommand": null
 }
