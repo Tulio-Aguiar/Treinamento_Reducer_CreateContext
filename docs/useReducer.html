@@ -1148,17 +1148,9 @@ type TodoAction =
       <pre><code class="language-typescript">function todoReducer(state: TodoState, action: TodoAction): TodoState {
   switch (action.type) {
     case 'ADD_TODO':
-      return {
-        ...state,
-        items: [
-          ...state.items,
-          {
-            id: crypto.randomUUID(),
-            text: action.payload,    // TypeScript sabe que payload é string aqui
-            completed: false,
-          },
-        ],
-      }
+      const cleaned = action.payload.trim()
+      if (!cleaned) return state
+      return { ...state, items: [...state.items, { id: crypto.randomUUID(), text: cleaned, completed: false }] }
 
     case 'TOGGLE_TODO':
       return {
@@ -1209,7 +1201,9 @@ type TodoAction =
         <span class="code-filename">TodoReducer.tsx — Passo 4</span>
         <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
       </div>
-      <pre><code class="language-typescript">const initialState: TodoState = {
+      <pre><code class="language-typescript">import { useReducer, useRef } from 'react'
+
+const initialState: TodoState = {
   items: [],
   filter: 'all',
   loading: false,
@@ -1217,9 +1211,12 @@ type TodoAction =
 
 export function TodoApp() {
   const [state, dispatch] = useReducer(todoReducer, initialState)
+  const inputRef = useRef&lt;HTMLInputElement&gt;(null)
 
   const handleAdd = (text: string) => {
+    if (!text.trim()) return
     dispatch({ type: 'ADD_TODO', payload: text })
+    if (inputRef.current) inputRef.current.value = ''
   }
 
   const handleToggle = (id: string) => {
@@ -1234,7 +1231,9 @@ export function TodoApp() {
 
   return (
     &lt;div&gt;
-      {/* ... UI usando state e dispatch ... */}
+      &lt;input ref={inputRef} placeholder="Nova tarefa..." /&gt;
+      &lt;button onClick={() => handleAdd(inputRef.current?.value ?? '')}&gt;Adicionar&lt;/button&gt;
+      {/* ... restante da UI usando state e dispatch ... */}
     &lt;/div&gt;
   )
 }</code></pre>
@@ -1903,19 +1902,28 @@ case 'ADD_ITEM':
         <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
       </div>
       <pre><code class="language-typescript">// Action Creators — funções que constroem as ações
-export const todoActions = {
-  add: (text: string) => ({ type: 'ADD' as const, payload: text }),
-  toggle: (id: string) => ({ type: 'TOGGLE' as const, payload: id }),
-  remove: (id: string) => ({ type: 'DELETE' as const, payload: id }),
+const todoActions = {
+  add: (text: string) => ({ type: 'ADD_TODO' as const, payload: text }),
+  toggle: (id: string) => ({ type: 'TOGGLE_TODO' as const, payload: id }),
+  remove: (id: string) => ({ type: 'REMOVE_TODO' as const, payload: id }),
   clearCompleted: () => ({ type: 'CLEAR_COMPLETED' as const }),
 }
+type TodoAction = ReturnType&lt;typeof todoActions[keyof typeof todoActions]&gt;
 
 // Uso no componente — mais legível e refactor-safe:
 dispatch(todoActions.add('Nova tarefa'))
 dispatch(todoActions.toggle(todo.id))
 
 // Em vez de:
-dispatch({ type: 'ADD', payload: 'Nova tarefa' })  // string literal propensa a typo</code></pre>
+dispatch({ type: 'ADD_TODO', payload: 'Nova tarefa' })  // string literal propensa a typo</code></pre>
+    </div>
+
+    <div class="info-box" style="margin-top: 16px;">
+      <div class="info-content">
+        <code>ReturnType&lt;typeof todoActions[keyof typeof todoActions]&gt;</code> deriva o tipo da union diretamente
+        dos próprios creators — o contrato de <code>TodoAction</code> permanece automaticamente sincronizado
+        sempre que um creator é adicionado, renomeado ou alterado, sem necessidade de manutenção manual da union.
+      </div>
     </div>
 
     <div class="steps">
@@ -2304,6 +2312,7 @@ export function Cart() {
           <li>Ações: <code>NEXT</code> (com payload dos dados da etapa atual), <code>BACK</code>, <code>SUBMIT</code></li>
           <li><code>NEXT</code> só avança se os dados da etapa estiverem válidos</li>
           <li>A etapa 3 (Confirmação) exibe um resumo com todos os dados coletados</li>
+          <li>Use <code>useRef&lt;HTMLInputElement&gt;</code> para os inputs de cada etapa: leia o valor via <code>inputRef.current?.value</code> no handler de avanço e limpe com <code>inputRef.current.value = ''</code> ao navegar para a próxima etapa</li>
           <li><strong>Extra:</strong> adicione uma barra de progresso visual com base no <code>step</code></li>
         </ul>
 
