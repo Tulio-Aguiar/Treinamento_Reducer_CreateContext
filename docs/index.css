@@ -1,4 +1,10 @@
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
 :root {
   --bg: #0d1117;
@@ -16,7 +22,7 @@
 }
 
 body {
-  font-family: 'Inter', sans-serif;
+  font-family: "Inter", sans-serif;
   background: var(--bg);
   color: var(--text);
   min-height: 100vh;
@@ -46,7 +52,9 @@ h1 {
   max-width: 700px;
 }
 
-h1 span { color: var(--react); }
+h1 span {
+  color: var(--react);
+}
 
 .subtitle {
   font-size: 1.05rem;
@@ -72,7 +80,10 @@ h1 span { color: var(--react); }
   padding: 36px;
   text-decoration: none;
   color: var(--text);
-  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    border-color 0.2s,
+    box-shadow 0.2s;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -80,20 +91,40 @@ h1 span { color: var(--react); }
 
 .card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 }
 
-.card.context { border-top: 3px solid var(--context); }
-.card.context:hover { border-color: var(--context); box-shadow: 0 20px 60px rgba(167,139,250,0.15); }
+.card.context {
+  border-top: 3px solid var(--context);
+}
+.card.context:hover {
+  border-color: var(--context);
+  box-shadow: 0 20px 60px rgba(167, 139, 250, 0.15);
+}
 
-.card.reducer { border-top: 3px solid var(--reducer); }
-.card.reducer:hover { border-color: var(--reducer); box-shadow: 0 20px 60px rgba(52,211,153,0.15); }
+.card.reducer {
+  border-top: 3px solid var(--reducer);
+}
+.card.reducer:hover {
+  border-color: var(--reducer);
+  box-shadow: 0 20px 60px rgba(52, 211, 153, 0.15);
+}
 
-.card.css { border-top: 3px solid var(--css); }
-.card.css:hover { border-color: var(--css); box-shadow: 0 20px 60px rgba(249,115,22,0.15); }
+.card.css {
+  border-top: 3px solid var(--css);
+}
+.card.css:hover {
+  border-color: var(--css);
+  box-shadow: 0 20px 60px rgba(249, 115, 22, 0.15);
+}
 
-.card.tailwind { border-top: 3px solid var(--tailwind); }
-.card.tailwind:hover { border-color: var(--tailwind); box-shadow: 0 20px 60px rgba(56,189,248,0.15); }
+.card.tailwind {
+  border-top: 3px solid var(--tailwind);
+}
+.card.tailwind:hover {
+  border-color: var(--tailwind);
+  box-shadow: 0 20px 60px rgba(56, 189, 248, 0.15);
+}
 
 .card-icon {
   font-size: 2.4rem;
@@ -110,10 +141,22 @@ h1 span { color: var(--react); }
   width: fit-content;
 }
 
-.card.context .card-badge { background: rgba(167,139,250,0.15); color: var(--context); }
-.card.reducer .card-badge { background: rgba(52,211,153,0.15); color: var(--reducer); }
-.card.css .card-badge { background: rgba(249,115,22,0.15); color: var(--css); }
-.card.tailwind .card-badge { background: rgba(56,189,248,0.15); color: var(--tailwind); }
+.card.context .card-badge {
+  background: rgba(167, 139, 250, 0.15);
+  color: var(--context);
+}
+.card.reducer .card-badge {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--reducer);
+}
+.card.css .card-badge {
+  background: rgba(249, 115, 22, 0.15);
+  color: var(--css);
+}
+.card.tailwind .card-badge {
+  background: rgba(56, 189, 248, 0.15);
+  color: var(--tailwind);
+}
 
 .card h2 {
   font-size: 1.4rem;
@@ -135,7 +178,7 @@ h1 span { color: var(--react); }
 
 .topic-tag {
   font-size: 11px;
-  font-family: 'JetBrains Mono', monospace;
+  font-family: "JetBrains Mono", monospace;
   padding: 4px 10px;
   background: var(--bg3);
   border: 1px solid var(--border);
@@ -152,10 +195,18 @@ h1 span { color: var(--react); }
   gap: 6px;
 }
 
-.card.context .card-cta { color: var(--context); }
-.card.reducer .card-cta { color: var(--reducer); }
-.card.css .card-cta { color: var(--css); }
-.card.tailwind .card-cta { color: var(--tailwind); }
+.card.context .card-cta {
+  color: var(--context);
+}
+.card.reducer .card-cta {
+  color: var(--reducer);
+}
+.card.css .card-cta {
+  color: var(--css);
+}
+.card.tailwind .card-cta {
+  color: var(--tailwind);
+}
 
 .footer {
   margin-top: 80px;
@@ -193,6 +244,15 @@ h1 span { color: var(--react); }
   border-radius: 50%;
 }
 
-.dot-react { background: var(--react); }
-.dot-ts { background: #3178c6; }
-.dot-vite { background: #646cff; }
+.dot-react {
+  background: var(--react);
+}
+.dot-ts {
+  background: #3178c6;
+}
+.dot-vite {
+  background: #646cff;
+}
+.dot-next {
+  background: #c2c2c2;
+}
