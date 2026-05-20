@@ -1,110 +1,139 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>React 19 — Treinamento Avançado de Estado</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="index.css" />
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>React 19 — Treinamento Avançado de Estado</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <div class="logo">React 19 · TypeScript · Vite</div>
 
-  <div class="logo">React 19 · TypeScript · Vite</div>
+    <h1>Dominando <span>Estado</span> em React</h1>
 
-  <h1>Dominando <span>Estado</span> em React</h1>
+    <p class="subtitle">
+      Quatro módulos de treinamento: estado React, CSS moderno e Tailwind.
+      Exemplos reais, progressão deliberada, sem atalhos.
+    </p>
 
-  <p class="subtitle">
-    Quatro módulos de treinamento: estado React, CSS moderno e Tailwind.
-    Exemplos reais, progressão deliberada, sem atalhos.
-  </p>
-
-  <div class="stack-badge">
-    <div class="badge"><span class="badge-dot dot-react"></span> React 19</div>
-    <div class="badge"><span class="badge-dot dot-ts"></span> TypeScript 5.9</div>
-    <div class="badge"><span class="badge-dot dot-vite"></span> Vite 7</div>
-  </div>
-
-  <div class="cards">
-
-    <a class="card context" href="useContext.html">
-      <div class="card-icon">🔮</div>
-      <span class="card-badge">Módulo 01</span>
-      <h2>useContext &amp; createContext</h2>
-      <p>
-        Estado global sem prop drilling. Entenda por que o Context existe,
-        como o React 19 o tornou mais limpo, e quando ele é a escolha certa.
-      </p>
-      <div class="card-topics">
-        <span class="topic-tag">createContext</span>
-        <span class="topic-tag">Provider</span>
-        <span class="topic-tag">useContext</span>
-        <span class="topic-tag">TypeScript types</span>
-        <span class="topic-tag">use() hook</span>
+    <div class="stack-badge">
+      <div class="badge">
+        <span class="badge-dot dot-react"></span> React 19
       </div>
-      <div class="card-cta">Entrar no módulo →</div>
-    </a>
-
-    <a class="card reducer" href="useReducer.html">
-      <div class="card-icon">⚡</div>
-      <span class="card-badge">Módulo 02</span>
-      <h2>useReducer</h2>
-      <p>
-        Estado complexo com lógica previsível. O padrão que Redux popularizou,
-        nativo no React, sem dependências externas.
-      </p>
-      <div class="card-topics">
-        <span class="topic-tag">reducer function</span>
-        <span class="topic-tag">dispatch</span>
-        <span class="topic-tag">action types</span>
-        <span class="topic-tag">immer pattern</span>
-        <span class="topic-tag">context + reducer</span>
+      <div class="badge">
+        <span class="badge-dot dot-ts"></span> TypeScript 5.9
       </div>
-      <div class="card-cta">Entrar no módulo →</div>
-    </a>
+      <div class="badge"><span class="badge-dot dot-vite"></span> Vite 7</div>
+    </div>
 
-    <a class="card css" href="css-moderno.html">
-      <div class="card-icon">🎨</div>
-      <span class="card-badge">Módulo 03</span>
-      <h2>CSS Moderno 2026</h2>
-      <p>
-        O que realmente mudou no CSS. Container Queries, <code style="font-family:monospace;font-size:0.85em">:has()</code>,
-        Cascade Layers, <code style="font-family:monospace;font-size:0.85em">@property</code> e
-        Scroll-Driven Animations no baseline estável.
-      </p>
-      <div class="card-topics">
-        <span class="topic-tag">@layer</span>
-        <span class="topic-tag">container queries</span>
-        <span class="topic-tag">:has()</span>
-        <span class="topic-tag">@property</span>
-        <span class="topic-tag">scroll-driven</span>
-      </div>
-      <div class="card-cta">Entrar no módulo →</div>
-    </a>
+    <div class="cards">
+      <a class="card context" href="useContext.html">
+        <div class="card-icon">🔮</div>
+        <span class="card-badge">Módulo 01</span>
+        <h2>useContext &amp; createContext</h2>
+        <p>
+          Estado global sem prop drilling. Entenda por que o Context existe,
+          como o React 19 o tornou mais limpo, e quando ele é a escolha certa.
+        </p>
+        <div class="card-topics">
+          <span class="topic-tag">createContext</span>
+          <span class="topic-tag">Provider</span>
+          <span class="topic-tag">useContext</span>
+          <span class="topic-tag">TypeScript types</span>
+          <span class="topic-tag">use() hook</span>
+        </div>
+        <div class="card-cta">Entrar no módulo →</div>
+      </a>
 
-    <a class="card tailwind" href="tailwind.html">
-      <div class="card-icon">🌊</div>
-      <span class="card-badge">Módulo 04</span>
-      <h2>Tailwind CSS</h2>
-      <p>
-        Do utility-first ao avançado. Responsividade, dark mode, estados,
-        <code style="font-family:monospace;font-size:0.85em">@apply</code>, config customizado, CVA e performance.
-      </p>
-      <div class="card-topics">
-        <span class="topic-tag">utility-first</span>
-        <span class="topic-tag">responsivo</span>
-        <span class="topic-tag">dark mode</span>
-        <span class="topic-tag">CVA</span>
-        <span class="topic-tag">JIT</span>
-      </div>
-      <div class="card-cta">Entrar no módulo →</div>
-    </a>
+      <a class="card reducer" href="useReducer.html">
+        <div class="card-icon">⚡</div>
+        <span class="card-badge">Módulo 02</span>
+        <h2>useReducer</h2>
+        <p>
+          Estado complexo com lógica previsível. O padrão que Redux popularizou,
+          nativo no React, sem dependências externas.
+        </p>
+        <div class="card-topics">
+          <span class="topic-tag">reducer function</span>
+          <span class="topic-tag">dispatch</span>
+          <span class="topic-tag">action types</span>
+          <span class="topic-tag">immer pattern</span>
+          <span class="topic-tag">context + reducer</span>
+        </div>
+        <div class="card-cta">Entrar no módulo →</div>
+      </a>
 
-  </div>
+      <a class="card css" href="css-moderno.html">
+        <div class="card-icon">🎨</div>
+        <span class="card-badge">Módulo 03</span>
+        <h2>CSS Moderno 2026</h2>
+        <p>
+          O que realmente mudou no CSS. Container Queries,
+          <code style="font-family: monospace; font-size: 0.85em">:has()</code>,
+          Cascade Layers,
+          <code style="font-family: monospace; font-size: 0.85em"
+            >@property</code
+          >
+          e Scroll-Driven Animations no baseline estável.
+        </p>
+        <div class="card-topics">
+          <span class="topic-tag">@layer</span>
+          <span class="topic-tag">container queries</span>
+          <span class="topic-tag">:has()</span>
+          <span class="topic-tag">@property</span>
+          <span class="topic-tag">scroll-driven</span>
+        </div>
+        <div class="card-cta">Entrar no módulo →</div>
+      </a>
 
-  <div class="footer">
-    Abra os arquivos .html diretamente no navegador · Copie os exemplos para o seu projeto Vite
-  </div>
+      <a class="card tailwind" href="tailwind.html">
+        <div class="card-icon">🌊</div>
+        <span class="card-badge">Módulo 04</span>
+        <h2>Tailwind CSS</h2>
+        <p>
+          Do utility-first ao avançado. Responsividade, dark mode, estados,
+          <code style="font-family: monospace; font-size: 0.85em">@apply</code>,
+          config customizado, CVA e performance.
+        </p>
+        <div class="card-topics">
+          <span class="topic-tag">utility-first</span>
+          <span class="topic-tag">responsivo</span>
+          <span class="topic-tag">dark mode</span>
+          <span class="topic-tag">CVA</span>
+          <span class="topic-tag">JIT</span>
+        </div>
+        <div class="card-cta">Entrar no módulo →</div>
+      </a>
 
-</body>
+      <a class="card tailwind" href="contextAPINext.html">
+        <div class="card-icon">🔮</div>
+        <span class="card-badge">Módulo 05</span>
+        <h2>NEXT</h2>
+        <p>
+          Aprenda a criar aplicativos web modernos com Next.js App Router, o
+          novo padrão de roteamento do React.
+        </p>
+        <div class="card-topics">
+          <span class="topic-tag">Next.js</span>
+          <span class="topic-tag">App Router</span>
+          <span class="topic-tag">React 19</span>
+          <span class="topic-tag">TypeScript</span>
+          <span class="topic-tag">Context API</span>
+          <span class="topic-tag">Server Actions</span>
+          <span class="topic-tag">Client Actions</span>
+        </div>
+        <div class="card-cta">Entrar no módulo →</div>
+      </a>
+    </div>
+
+    <div class="footer">
+      Abra os arquivos .html diretamente no navegador · Copie os exemplos para o
+      seu projeto Vite
+    </div>
+  </body>
 </html>
