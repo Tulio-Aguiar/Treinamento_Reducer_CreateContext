@@ -1,0 +1,2128 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Context API no Next.js App Router — Protocolo Aruanda</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      /* ─── Reset & Tokens ──────────────────────────────────────────── */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      :root {
+        --bg: #0d1117;
+        --bg-card: #161b22;
+        --bg-code: #0d1117;
+        --bg-aside: #1c2333;
+        --border: #30363d;
+        --border-soft: #21262d;
+        --text: #e6edf3;
+        --text-muted: #8b949e;
+        --text-dim: #6e7681;
+        --accent: #58a6ff;
+        --accent-2: #79c0ff;
+        --green: #3fb950;
+        --yellow: #d29922;
+        --red: #f85149;
+        --purple: #bc8cff;
+        --orange: #ffa657;
+        --radius: 8px;
+        --radius-lg: 12px;
+        --font-mono: "JetBrains Mono", "Fira Code", monospace;
+        --font-sans: "Inter", system-ui, sans-serif;
+        --sidebar-w: 260px;
+        --max-content: 860px;
+      }
+
+      html {
+        scroll-behavior: smooth;
+      }
+
+      body {
+        font-family: var(--font-sans);
+        background: var(--bg);
+        color: var(--text);
+        line-height: 1.7;
+        font-size: 15px;
+      }
+
+      /* ─── Layout ──────────────────────────────────────────────────── */
+      .layout {
+        display: grid;
+        grid-template-columns: var(--sidebar-w) 1fr;
+        min-height: 100vh;
+      }
+
+      /* ─── Sidebar ─────────────────────────────────────────────────── */
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        border-right: 1px solid var(--border);
+        background: var(--bg-card);
+        padding: 2rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .sidebar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .sidebar::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      .sidebar-back {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--text-muted);
+        text-decoration: none;
+        transition: color 0.2s;
+      }
+      .sidebar-back:hover {
+        color: var(--accent);
+      }
+
+      .sidebar-module {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+      }
+
+      .sidebar-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+        line-height: 1.4;
+        margin-top: 0.25rem;
+      }
+
+      .sidebar-section-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        color: var(--text-dim);
+        margin-bottom: 0.5rem;
+      }
+
+      .sidebar-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+      }
+
+      .sidebar-nav a {
+        font-size: 13px;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.3rem 0.6rem;
+        border-radius: 6px;
+        transition:
+          background 0.15s,
+          color 0.15s;
+        line-height: 1.4;
+      }
+      .sidebar-nav a:hover {
+        background: var(--bg-aside);
+        color: var(--text);
+      }
+
+      .sidebar-nav .badge {
+        display: inline-block;
+        font-size: 10px;
+        padding: 1px 6px;
+        border-radius: 10px;
+        font-weight: 600;
+        margin-left: 6px;
+        vertical-align: middle;
+      }
+      .badge-basic {
+        background: #1f3324;
+        color: var(--green);
+      }
+      .badge-medio {
+        background: #2d2a1e;
+        color: var(--yellow);
+      }
+      .badge-avancado {
+        background: #2d1e2d;
+        color: var(--purple);
+      }
+
+      /* ─── Main Content ────────────────────────────────────────────── */
+      .main {
+        max-width: var(--max-content);
+        padding: 3rem 3rem 6rem;
+        margin: 0 auto;
+        width: 100%;
+      }
+
+      /* ─── Hero ────────────────────────────────────────────────────── */
+      .hero {
+        padding-bottom: 2.5rem;
+        border-bottom: 1px solid var(--border-soft);
+        margin-bottom: 3rem;
+      }
+
+      .hero-breadcrumb {
+        font-size: 12px;
+        color: var(--text-dim);
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 1rem;
+      }
+      .hero-breadcrumb span {
+        color: var(--accent);
+      }
+
+      .hero h1 {
+        font-size: clamp(1.75rem, 4vw, 2.5rem);
+        font-weight: 700;
+        line-height: 1.2;
+        color: var(--text);
+        margin-bottom: 0.75rem;
+      }
+
+      .hero-subtitle {
+        color: var(--text-muted);
+        font-size: 1rem;
+        line-height: 1.6;
+        max-width: 640px;
+      }
+
+      .hero-tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+      }
+
+      .tag {
+        font-size: 12px;
+        font-family: var(--font-mono);
+        padding: 3px 10px;
+        border-radius: 20px;
+        border: 1px solid var(--border);
+        color: var(--text-muted);
+        background: var(--bg-aside);
+      }
+
+      /* ─── Section ─────────────────────────────────────────────────── */
+      .section {
+        margin-bottom: 3.5rem;
+        scroll-margin-top: 1.5rem;
+      }
+
+      .section-header {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 1px solid var(--border-soft);
+      }
+
+      .section-num {
+        font-size: 11px;
+        font-weight: 700;
+        font-family: var(--font-mono);
+        color: var(--accent);
+        background: rgba(88, 166, 255, 0.1);
+        border: 1px solid rgba(88, 166, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 20px;
+        flex-shrink: 0;
+      }
+
+      .section h2 {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .section h3 {
+        font-size: 1rem;
+        font-weight: 600;
+        color: var(--text);
+        margin: 1.75rem 0 0.75rem;
+      }
+
+      .section p {
+        color: var(--text-muted);
+        margin-bottom: 1rem;
+        line-height: 1.8;
+      }
+
+      /* ─── Code blocks ─────────────────────────────────────────────── */
+      .code-block {
+        position: relative;
+        background: var(--bg-code);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin: 1.25rem 0;
+      }
+
+      .code-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 1rem;
+        border-bottom: 1px solid var(--border-soft);
+        background: var(--bg-card);
+      }
+
+      .code-filename {
+        font-family: var(--font-mono);
+        font-size: 12px;
+        color: var(--text-dim);
+      }
+
+      .copy-btn {
+        font-size: 11px;
+        color: var(--text-dim);
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: 5px;
+        padding: 2px 8px;
+        cursor: pointer;
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+        font-family: var(--font-sans);
+      }
+      .copy-btn:hover {
+        color: var(--text);
+        border-color: var(--text-muted);
+      }
+      .copy-btn.copied {
+        color: var(--green);
+        border-color: var(--green);
+      }
+
+      pre {
+        padding: 1.25rem 1.5rem;
+        overflow-x: auto;
+        font-family: var(--font-mono);
+        font-size: 13px;
+        line-height: 1.7;
+        color: var(--text);
+      }
+
+      pre::-webkit-scrollbar {
+        height: 5px;
+      }
+      pre::-webkit-scrollbar-thumb {
+        background: var(--border);
+        border-radius: 4px;
+      }
+
+      code {
+        font-family: var(--font-mono);
+      }
+
+      /* Inline code */
+      p code,
+      li code,
+      td code {
+        font-size: 0.85em;
+        background: var(--bg-aside);
+        border: 1px solid var(--border-soft);
+        border-radius: 4px;
+        padding: 1px 5px;
+        color: var(--accent-2);
+      }
+
+      /* ─── Syntax highlight (manual classes) ──────────────────────── */
+      .kw {
+        color: #ff7b72;
+      } /* keyword */
+      .fn {
+        color: #d2a8ff;
+      } /* function */
+      .str {
+        color: #a5d6ff;
+      } /* string */
+      .cmt {
+        color: #6e7781;
+        font-style: italic;
+      } /* comment */
+      .typ {
+        color: #ffa657;
+      } /* type */
+      .num {
+        color: #79c0ff;
+      } /* number/const */
+      .op {
+        color: #ff7b72;
+      } /* operator */
+
+      /* ─── Tables ──────────────────────────────────────────────────── */
+      .table-wrap {
+        overflow-x: auto;
+        margin: 1.25rem 0;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 13.5px;
+      }
+
+      thead th {
+        text-align: left;
+        padding: 0.6rem 1rem;
+        background: var(--bg-aside);
+        color: var(--text-muted);
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid var(--border);
+      }
+
+      tbody td {
+        padding: 0.65rem 1rem;
+        border-bottom: 1px solid var(--border-soft);
+        color: var(--text-muted);
+        vertical-align: top;
+        line-height: 1.6;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+      tbody tr:hover td {
+        background: rgba(255, 255, 255, 0.02);
+      }
+
+      td:first-child {
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        color: var(--accent-2);
+      }
+
+      /* ─── Callouts ────────────────────────────────────────────────── */
+      .callout {
+        display: flex;
+        gap: 0.75rem;
+        padding: 0.9rem 1.1rem;
+        border-radius: var(--radius);
+        margin: 1.25rem 0;
+        font-size: 14px;
+        line-height: 1.7;
+      }
+
+      .callout-icon {
+        flex-shrink: 0;
+        font-size: 16px;
+        margin-top: 1px;
+      }
+      .callout p {
+        margin: 0;
+      }
+
+      .callout-info {
+        background: rgba(88, 166, 255, 0.08);
+        border: 1px solid rgba(88, 166, 255, 0.2);
+      }
+      .callout-warning {
+        background: rgba(210, 153, 34, 0.08);
+        border: 1px solid rgba(210, 153, 34, 0.2);
+      }
+      .callout-tip {
+        background: rgba(63, 185, 80, 0.08);
+        border: 1px solid rgba(63, 185, 80, 0.2);
+      }
+
+      .callout-info .callout-icon {
+        color: var(--accent);
+      }
+      .callout-warning .callout-icon {
+        color: var(--yellow);
+      }
+      .callout-tip .callout-icon {
+        color: var(--green);
+      }
+
+      .callout-info p {
+        color: #93c5fd;
+      }
+      .callout-warning p {
+        color: #fcd34d;
+      }
+      .callout-tip p {
+        color: #86efac;
+      }
+
+      /* ─── Comparison block ────────────────────────────────────────── */
+      .compare-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin: 1.25rem 0;
+      }
+
+      .compare-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 1rem;
+      }
+
+      .compare-label {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 0.6rem;
+      }
+      .compare-label.ok {
+        color: var(--green);
+      }
+      .compare-label.bad {
+        color: var(--red);
+      }
+
+      /* ─── Flow diagram ────────────────────────────────────────────── */
+      .flow-block {
+        background: var(--bg-code);
+        border: 1px solid var(--border);
+        border-left: 3px solid var(--accent);
+        border-radius: var(--radius);
+        padding: 1.25rem 1.5rem;
+        font-family: var(--font-mono);
+        font-size: 12.5px;
+        line-height: 2;
+        color: var(--text-muted);
+        margin: 1.25rem 0;
+        overflow-x: auto;
+      }
+
+      .flow-block .flow-arrow {
+        color: var(--accent);
+      }
+      .flow-block .flow-note {
+        color: var(--green);
+      }
+
+      /* ─── Exercises ───────────────────────────────────────────────── */
+      .exercise {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        margin-bottom: 1.75rem;
+      }
+
+      .exercise-header {
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border);
+      }
+
+      .exercise-level {
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 20px;
+      }
+      .level-basico {
+        background: #1f3324;
+        color: var(--green);
+      }
+      .level-medio {
+        background: #2d2a1e;
+        color: var(--yellow);
+      }
+      .level-avancado {
+        background: #2d1e2d;
+        color: var(--purple);
+      }
+
+      .exercise-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: var(--text);
+      }
+
+      .exercise-body {
+        padding: 1.25rem;
+        background: var(--bg);
+      }
+
+      .exercise-body p {
+        font-size: 14px;
+        color: var(--text-muted);
+        margin-bottom: 0.9rem;
+      }
+
+      .exercise-body ul {
+        padding-left: 1.25rem;
+        margin-bottom: 1rem;
+      }
+
+      .exercise-body li {
+        font-size: 13.5px;
+        color: var(--text-muted);
+        margin-bottom: 0.4rem;
+        line-height: 1.6;
+      }
+
+      .acceptance {
+        background: rgba(63, 185, 80, 0.06);
+        border: 1px solid rgba(63, 185, 80, 0.15);
+        border-radius: var(--radius);
+        padding: 0.75rem 1rem;
+        font-size: 13px;
+        color: #86efac;
+        margin-top: 0.75rem;
+      }
+
+      .acceptance strong {
+        color: var(--green);
+      }
+
+      /* ─── Solution toggle ─────────────────────────────────────────── */
+      .solution-toggle {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin: 1rem 0 0;
+        padding: 0.6rem 1rem;
+        background: none;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        color: var(--text-muted);
+        font-size: 13px;
+        font-family: var(--font-sans);
+        cursor: pointer;
+        transition:
+          border-color 0.2s,
+          color 0.2s,
+          background 0.2s;
+        width: 100%;
+        text-align: left;
+      }
+
+      .solution-toggle:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+        background: rgba(88, 166, 255, 0.05);
+      }
+
+      .solution-toggle .toggle-icon {
+        transition: transform 0.25s;
+        font-style: normal;
+        display: inline-block;
+      }
+
+      .solution-toggle[aria-expanded="true"] .toggle-icon {
+        transform: rotate(90deg);
+      }
+
+      .solution-panel {
+        display: none;
+        margin-top: 0.75rem;
+        border: 1px solid var(--border-soft);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+
+      .solution-panel.open {
+        display: block;
+      }
+
+      .solution-panel-header {
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--text-dim);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 0.6rem 1rem;
+        background: var(--bg-card);
+        border-bottom: 1px solid var(--border-soft);
+      }
+
+      /* ─── Divider ─────────────────────────────────────────────────── */
+      hr {
+        border: none;
+        border-top: 1px solid var(--border-soft);
+        margin: 2.5rem 0;
+      }
+
+      /* ─── Footer nav ──────────────────────────────────────────────── */
+      .page-nav {
+        display: flex;
+        justify-content: flex-start;
+        margin-top: 4rem;
+        padding-top: 2rem;
+        border-top: 1px solid var(--border-soft);
+      }
+
+      .page-nav a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 14px;
+        color: var(--text-muted);
+        text-decoration: none;
+        padding: 0.6rem 1rem;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        transition:
+          color 0.2s,
+          border-color 0.2s;
+      }
+
+      .page-nav a:hover {
+        color: var(--accent);
+        border-color: var(--accent);
+      }
+
+      /* ─── Responsive ──────────────────────────────────────────────── */
+      @media (max-width: 900px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+        .sidebar {
+          display: none;
+        }
+        .main {
+          padding: 2rem 1.25rem 4rem;
+        }
+        .compare-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <!-- ─── Sidebar ──────────────────────────────────────────────────── -->
+      <aside class="sidebar">
+        <a class="sidebar-back" href="index.html">← Início</a>
+
+        <div>
+          <div class="sidebar-module">⚙️ Next.js · Módulo Context</div>
+          <div class="sidebar-title">Context API no App Router</div>
+        </div>
+
+        <nav>
+          <div class="sidebar-section-label">Conceito</div>
+          <div class="sidebar-nav">
+            <a href="#contexto-vs-nextjs">React puro vs. Next.js</a>
+            <a href="#tipos">Modelagem de tipos</a>
+            <a href="#applytheme">Função applyTheme</a>
+            <a href="#resolve">resolveInitialTheme</a>
+          </div>
+        </nav>
+
+        <nav>
+          <div class="sidebar-section-label">Implementação</div>
+          <div class="sidebar-nav">
+            <a href="#provider">O Provider</a>
+            <a href="#hook">Hook useTheme</a>
+            <a href="#toggle">ThemeToggle</a>
+            <a href="#layout">layout.tsx</a>
+            <a href="#variant">@custom-variant</a>
+            <a href="#fluxo">Fluxo completo</a>
+            <a href="#decisoes">Decisões de design</a>
+          </div>
+        </nav>
+
+        <nav>
+          <div class="sidebar-section-label">Exercícios</div>
+          <div class="sidebar-nav">
+            <a href="#ex1"
+              >Ex.1 — FontSizeContext
+              <span class="badge badge-basic">Básico</span></a
+            >
+            <a href="#ex2"
+              >Ex.2 — Tema com 'system'
+              <span class="badge badge-medio">Médio</span></a
+            >
+            <a href="#ex3"
+              >Ex.3 — UserPreferences
+              <span class="badge badge-avancado">Avançado</span></a
+            >
+          </div>
+        </nav>
+      </aside>
+
+      <!-- ─── Main ─────────────────────────────────────────────────────── -->
+      <main class="main">
+        <!-- Hero -->
+        <header class="hero">
+          <div class="hero-breadcrumb">
+            Protocolo Aruanda · <span>Next.js 15 · App Router</span>
+          </div>
+          <h1>Context API no<br />Next.js App Router</h1>
+          <p class="hero-subtitle">
+            Implementação completa de um sistema de tema com Context API — do
+            problema ao fluxo de hidratação. Cada decisão documentada, cada
+            armadilha do SSR explicada linha por linha.
+          </p>
+          <div class="hero-tags">
+            <span class="tag">React 19</span>
+            <span class="tag">TypeScript</span>
+            <span class="tag">Next.js 15</span>
+            <span class="tag">App Router</span>
+            <span class="tag">Tailwind v4</span>
+            <span class="tag">'use client'</span>
+          </div>
+        </header>
+
+        <!-- ─── 01 React puro vs Next.js ─── -->
+        <section class="section" id="contexto-vs-nextjs">
+          <div class="section-header">
+            <span class="section-num">01</span>
+            <h2>O que é Context API e por que ela existe</h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">ThemeContext.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="kw">const</span> <span class="num">ThemeContext</span> = <span class="fn">createContext</span>&lt;<span class="typ">ThemeContextValue</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>)</code></pre>
+          </div>
+
+          <p>
+            Context API é o mecanismo nativo do React para distribuir estado
+            pela árvore de componentes sem passar props manualmente a cada
+            nível. O problema que ela resolve tem nome:
+            <strong>prop drilling</strong> — a prática de passar um dado por
+            vários componentes intermediários que não precisam daquele dado,
+            apenas para que um descendente distante o receba.
+          </p>
+
+          <h3 id="contexto-vs-nextjs-sub">
+            Context API em React puro vs. Next.js App Router
+          </h3>
+
+          <p>
+            A diferença não está na API — <code>createContext</code>,
+            <code>useContext</code> e <code>useState</code> funcionam da mesma
+            forma. A diferença está no ambiente de execução.
+          </p>
+
+          <p>
+            Em React puro (Vite), todo código roda no browser. Não existe
+            servidor. <code>localStorage</code>, <code>window</code> e
+            <code>document</code> estão sempre disponíveis. No Next.js App
+            Router, cada arquivo é um
+            <strong>Server Component por padrão</strong> — executado no
+            servidor, onde browser APIs não existem.
+          </p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Ambiente</th>
+                  <th>Execução padrão</th>
+                  <th>Context API</th>
+                  <th>Browser APIs</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>React puro (Vite)</td>
+                  <td>Browser</td>
+                  <td>Disponível diretamente</td>
+                  <td>Sempre acessíveis</td>
+                </tr>
+                <tr>
+                  <td>Next.js App Router</td>
+                  <td>Servidor</td>
+                  <td>Requer <code>'use client'</code></td>
+                  <td>Requer guard <code>typeof window</code></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-warning">
+            <span class="callout-icon">⚠️</span>
+            <p>
+              Sem a diretiva <code>'use client'</code>, o Next.js tenta executar
+              o Provider no servidor e lança erro ao encontrar
+              <code>useState</code>. O erro não é sobre Context em si — é sobre
+              hooks rodando fora do ambiente de browser.
+            </p>
+          </div>
+        </section>
+
+        <!-- ─── 02 Tipos ─── -->
+        <section class="section" id="tipos">
+          <div class="section-header">
+            <span class="section-num">02</span>
+            <h2>Modelagem dos tipos</h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">ThemeContext.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="kw">type</span> <span class="typ">Theme</span> = <span class="str">'light'</span> | <span class="str">'dark'</span>
+
+<span class="kw">type</span> <span class="typ">ThemeContextValue</span> = {
+  theme: <span class="typ">Theme</span>
+  toggleTheme: () =&gt; <span class="kw">void</span>
+}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Linha</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>type Theme = 'light' | 'dark'</td>
+                  <td>
+                    Union type literal. O TypeScript aceita apenas essas duas
+                    strings. Qualquer outro valor causa erro em tempo de
+                    compilação.
+                  </td>
+                </tr>
+                <tr>
+                  <td>type ThemeContextValue</td>
+                  <td>
+                    Define o contrato do contexto — o que qualquer consumidor
+                    vai receber ao chamar <code>useTheme</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>theme: Theme</td>
+                  <td>
+                    O estado atual. Leitura apenas — o consumidor não modifica
+                    diretamente.
+                  </td>
+                </tr>
+                <tr>
+                  <td>toggleTheme: () => void</td>
+                  <td>
+                    A única ação disponível. O consumidor chama a função sem
+                    saber como o estado muda internamente.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            O <code>createContext</code> recebe
+            <code>ThemeContextValue | null</code> porque no momento da criação o
+            contexto não tem valor. O <code>null</code> é o estado inicial antes
+            de qualquer Provider existir na árvore. O
+            <code>useTheme</code> trata esse caso com um guard explícito.
+          </p>
+        </section>
+
+        <!-- ─── 03 applyTheme ─── -->
+        <section class="section" id="applytheme">
+          <div class="section-header">
+            <span class="section-num">03</span>
+            <h2>A função auxiliar <code>applyTheme</code></h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">ThemeContext.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="kw">const</span> <span class="fn">applyTheme</span> = (theme: <span class="typ">Theme</span>): <span class="kw">void</span> =&gt; {
+  document.documentElement.<span class="fn">setAttribute</span>(<span class="str">'data-theme'</span>, theme)
+  localStorage.<span class="fn">setItem</span>(<span class="str">'theme'</span>, theme)
+}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Linha</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>document.documentElement</td>
+                  <td>
+                    Referência ao elemento <code>&lt;html&gt;</code>. É onde o
+                    atributo <code>data-theme</code> precisa estar para que o
+                    <code>@custom-variant dark</code> do Tailwind funcione em
+                    todos os descendentes.
+                  </td>
+                </tr>
+                <tr>
+                  <td>.setAttribute('data-theme', theme)</td>
+                  <td>
+                    Escreve <code>data-theme="light"</code> ou
+                    <code>data-theme="dark"</code> no <code>&lt;html&gt;</code>.
+                    O Tailwind lê esse atributo via a custom variant declarada
+                    no CSS.
+                  </td>
+                </tr>
+                <tr>
+                  <td>localStorage.setItem('theme', theme)</td>
+                  <td>
+                    Persiste a preferência. Na próxima visita,
+                    <code>resolveInitialTheme</code> vai encontrar esse valor e
+                    restaurar o tema sem flash.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">💡</span>
+            <p>
+              Essa função é declarada <strong>fora do componente</strong> porque
+              não depende de estado ou props. Função pura de efeito colateral:
+              recebe um valor, escreve em dois lugares externos. Declarar fora
+              evita recriação a cada render.
+            </p>
+          </div>
+        </section>
+
+        <!-- ─── 04 resolveInitialTheme ─── -->
+        <section class="section" id="resolve">
+          <div class="section-header">
+            <span class="section-num">04</span>
+            <h2><code>resolveInitialTheme</code> e o guard de ambiente</h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">ThemeContext.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="kw">const</span> <span class="fn">resolveInitialTheme</span> = (): <span class="typ">Theme</span> =&gt; {
+  <span class="kw">if</span> (<span class="kw">typeof</span> window === <span class="str">'undefined'</span>) <span class="kw">return</span> <span class="str">'light'</span>
+
+  <span class="kw">const</span> stored = localStorage.<span class="fn">getItem</span>(<span class="str">'theme'</span>)
+  <span class="kw">if</span> (stored === <span class="str">'light'</span> || stored === <span class="str">'dark'</span>) <span class="kw">return</span> stored
+  <span class="kw">return</span> window.<span class="fn">matchMedia</span>(<span class="str">'(prefers-color-scheme: dark)'</span>).matches
+    ? <span class="str">'dark'</span>
+    : <span class="str">'light'</span>
+}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Linha</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>typeof window === 'undefined'</td>
+                  <td>
+                    Guard de ambiente. No servidor, <code>window</code> não
+                    existe — acessá-lo lança <code>ReferenceError</code>.
+                    Retorna <code>'light'</code> como fallback seguro antes de
+                    qualquer código browser rodar.
+                  </td>
+                </tr>
+                <tr>
+                  <td>localStorage.getItem('theme')</td>
+                  <td>
+                    Lê a preferência persistida. Retorna <code>null</code> se
+                    não existir.
+                  </td>
+                </tr>
+                <tr>
+                  <td>stored === 'light' || stored === 'dark'</td>
+                  <td>
+                    Validação explícita. O TypeScript precisa dessa checagem
+                    para aceitar <code>stored</code> como <code>Theme</code> —
+                    <code>string | null</code> não é <code>Theme</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>window.matchMedia(...).matches</td>
+                  <td>
+                    Lê a preferência do sistema operacional. Se o usuário nunca
+                    visitou o site, o tema inicial segue o SO.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>
+            A hierarquia de decisão é:
+            <strong>storage › preferência do sistema › fallback light</strong>.
+          </p>
+
+          <h3>Inicializador lazy do <code>useState</code></h3>
+
+          <div class="compare-grid">
+            <div class="compare-card">
+              <div class="compare-label ok">✅ Correto</div>
+              <pre
+                style="padding: 0; background: none; font-size: 12px"
+              ><code><span class="fn">useState</span>(resolveInitialTheme)
+<span class="cmt">// React chama uma vez na montagem</span></code></pre>
+            </div>
+            <div class="compare-card">
+              <div class="compare-label bad">❌ Incorreto</div>
+              <pre
+                style="padding: 0; background: none; font-size: 12px"
+              ><code><span class="fn">useState</span>(<span class="fn">resolveInitialTheme</span>())
+<span class="cmt">// Executa durante o render</span>
+<span class="cmt">// ReferenceError no SSR</span></code></pre>
+            </div>
+          </div>
+
+          <p>
+            Passar a referência (sem parênteses) é o padrão de inicializador
+            lazy do <code>useState</code>. O React garante que a função seja
+            chamada apenas uma vez, no cliente, após a montagem.
+          </p>
+        </section>
+
+        <!-- ─── 05 Provider ─── -->
+        <section class="section" id="provider">
+          <div class="section-header">
+            <span class="section-num">05</span>
+            <h2>O Provider</h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">src/contexts/ThemeContext.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="str">'use client'</span>
+
+<span class="kw">import</span> { createContext, useContext, useState } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">type</span> <span class="typ">Theme</span> = <span class="str">'light'</span> | <span class="str">'dark'</span>
+
+<span class="kw">type</span> <span class="typ">ThemeContextValue</span> = {
+  theme: <span class="typ">Theme</span>
+  toggleTheme: () =&gt; <span class="kw">void</span>
+}
+
+<span class="kw">const</span> <span class="num">ThemeContext</span> = <span class="fn">createContext</span>&lt;<span class="typ">ThemeContextValue</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>)
+
+<span class="kw">type</span> <span class="typ">ThemeProviderProps</span> = { children: <span class="typ">React.ReactNode</span> }
+
+<span class="kw">const</span> <span class="fn">applyTheme</span> = (theme: <span class="typ">Theme</span>): <span class="kw">void</span> =&gt; {
+  document.documentElement.<span class="fn">setAttribute</span>(<span class="str">'data-theme'</span>, theme)
+  localStorage.<span class="fn">setItem</span>(<span class="str">'theme'</span>, theme)
+}
+
+<span class="kw">const</span> <span class="fn">resolveInitialTheme</span> = (): <span class="typ">Theme</span> =&gt; {
+  <span class="kw">if</span> (<span class="kw">typeof</span> window === <span class="str">'undefined'</span>) <span class="kw">return</span> <span class="str">'light'</span>
+  <span class="kw">const</span> stored = localStorage.<span class="fn">getItem</span>(<span class="str">'theme'</span>)
+  <span class="kw">if</span> (stored === <span class="str">'light'</span> || stored === <span class="str">'dark'</span>) <span class="kw">return</span> stored
+  <span class="kw">return</span> window.<span class="fn">matchMedia</span>(<span class="str">'(prefers-color-scheme: dark)'</span>).matches ? <span class="str">'dark'</span> : <span class="str">'light'</span>
+}
+
+<span class="kw">export const</span> <span class="fn">ThemeProvider</span> = ({ children }: <span class="typ">ThemeProviderProps</span>) =&gt; {
+  <span class="kw">const</span> [theme, setTheme] = <span class="fn">useState</span>&lt;<span class="typ">Theme</span>&gt;(resolveInitialTheme)
+
+  <span class="kw">const</span> <span class="fn">toggleTheme</span> = (): <span class="kw">void</span> =&gt; {
+    <span class="kw">const</span> next: <span class="typ">Theme</span> = theme === <span class="str">'light'</span> ? <span class="str">'dark'</span> : <span class="str">'light'</span>
+    <span class="fn">applyTheme</span>(next)
+    <span class="fn">setTheme</span>(next)
+  }
+
+  <span class="kw">return</span> &lt;<span class="fn">ThemeContext</span> value={{ theme, toggleTheme }}&gt;{children}&lt;/<span class="fn">ThemeContext</span>&gt;
+}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Linha</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>useState&lt;Theme&gt;(resolveInitialTheme)</td>
+                  <td>
+                    Inicializa o estado com o tema resolvido. O React chama
+                    <code>resolveInitialTheme</code> uma vez na montagem no
+                    cliente.
+                  </td>
+                </tr>
+                <tr>
+                  <td>const next: Theme</td>
+                  <td>
+                    Calcula o próximo tema antes de qualquer escrita. Evita
+                    repetir a expressão em <code>applyTheme</code> e
+                    <code>setTheme</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>applyTheme(next)</td>
+                  <td>
+                    Escreve no DOM e no storage <strong>antes</strong> de setar
+                    o estado React. O browser aplica a mudança visual
+                    imediatamente, sem esperar o próximo render.
+                  </td>
+                </tr>
+                <tr>
+                  <td>setTheme(next)</td>
+                  <td>
+                    Atualiza o estado React para sincronizar a UI — o label do
+                    botão precisa refletir o tema atual.
+                  </td>
+                </tr>
+                <tr>
+                  <td>&lt;ThemeContext value={...}&gt;</td>
+                  <td>
+                    Sintaxe do React 19. Em versões anteriores era
+                    <code>&lt;ThemeContext.Provider value={...}&gt;</code>.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-warning">
+            <span class="callout-icon">⚠️</span>
+            <p>
+              <strong>A ordem importa.</strong> Se <code>setTheme</code> viesse
+              antes de <code>applyTheme</code>, o React agendaria um re-render
+              com o novo estado — mas o <code>data-theme</code> no
+              <code>&lt;html&gt;</code> ainda seria o antigo. O resultado seria
+              um frame com estado React novo e DOM antigo. Chamando
+              <code>applyTheme</code> primeiro, o DOM muda sincronicamente.
+            </p>
+          </div>
+        </section>
+
+        <!-- ─── 06 Hook ─── -->
+        <section class="section" id="hook">
+          <div class="section-header">
+            <span class="section-num">06</span>
+            <h2>O hook <code>useTheme</code></h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">src/contexts/ThemeContext.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="kw">export const</span> <span class="fn">useTheme</span> = (): <span class="typ">ThemeContextValue</span> =&gt; {
+  <span class="kw">const</span> ctx = <span class="fn">useContext</span>(ThemeContext)
+  <span class="kw">if</span> (!ctx) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'useTheme deve ser usado dentro de ThemeProvider'</span>)
+  <span class="kw">return</span> ctx
+}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Linha</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>useContext(ThemeContext)</td>
+                  <td>
+                    Lê o valor do Provider mais próximo na árvore. Se não houver
+                    Provider, retorna o valor inicial do
+                    <code>createContext</code> — que é <code>null</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>if (!ctx) throw new Error(...)</td>
+                  <td>
+                    Guard contra uso fora do Provider. Transforma erro
+                    silencioso (contexto <code>null</code>) em mensagem clara de
+                    diagnóstico.
+                  </td>
+                </tr>
+                <tr>
+                  <td>return ctx</td>
+                  <td>
+                    Após o guard, o TypeScript sabe que <code>ctx</code> não é
+                    <code>null</code>. O tipo é <code>ThemeContextValue</code>,
+                    sem necessidade de non-null assertion.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-tip">
+            <span class="callout-icon">💡</span>
+            <p>
+              Esse padrão de hook wrapper é a convenção para contextos com
+              TypeScript. Sem ele, todo consumidor precisaria checar
+              <code>null</code> manualmente — ou usar o operador
+              <code>!</code> (non-null assertion), que mascara o problema sem
+              resolver.
+            </p>
+          </div>
+        </section>
+
+        <!-- ─── 07 ThemeToggle ─── -->
+        <section class="section" id="toggle">
+          <div class="section-header">
+            <span class="section-num">07</span>
+            <h2>O componente <code>ThemeToggle</code></h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename"
+                >src/components/ThemeToggle/ThemeToggle.tsx</span
+              >
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="str">'use client'</span>
+
+<span class="kw">import</span> { Moon, Sun } <span class="kw">from</span> <span class="str">'lucide-react'</span>
+<span class="kw">import</span> { useTheme } <span class="kw">from</span> <span class="str">'@/contexts/ThemeContext'</span>
+
+<span class="kw">export const</span> <span class="fn">ThemeToggle</span> = () =&gt; {
+  <span class="kw">const</span> { theme, toggleTheme } = <span class="fn">useTheme</span>()
+  <span class="kw">const</span> isDark = theme === <span class="str">'dark'</span>
+
+  <span class="kw">return</span> (
+    &lt;button
+      onClick={toggleTheme}
+      aria-label={isDark ? <span class="str">'Ativar modo claro'</span> : <span class="str">'Ativar modo escuro'</span>}
+      className=<span class="str">"flex items-center gap-2 px-4 py-2 rounded-lg
+        border border-black/10 bg-white text-gray-800
+        hover:bg-gray-100
+        dark:border-white/10 dark:bg-zinc-800
+        dark:text-gray-100 dark:hover:bg-zinc-700
+        transition-colors duration-200 cursor-pointer"</span>
+    &gt;
+      {isDark ? &lt;<span class="fn">Sun</span> size={18} /&gt; : &lt;<span class="fn">Moon</span> size={18} /&gt;}
+      &lt;span className=<span class="str">"text-sm font-medium"</span>&gt;
+        {isDark ? <span class="str">'Modo claro'</span> : <span class="str">'Modo escuro'</span>}
+      &lt;/span&gt;
+    &lt;/button&gt;
+  )
+}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Linha</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>'use client'</td>
+                  <td>
+                    Obrigatório. <code>useTheme</code> usa
+                    <code>useContext</code> — hook exclusivo de Client
+                    Components.
+                  </td>
+                </tr>
+                <tr>
+                  <td>const isDark = theme === 'dark'</td>
+                  <td>
+                    Estado derivado local. Evita repetir
+                    <code>theme === 'dark'</code> em três lugares distintos no
+                    JSX.
+                  </td>
+                </tr>
+                <tr>
+                  <td>aria-label={isDark ? ...}</td>
+                  <td>
+                    Acessibilidade. O label descreve a ação que o botão executa,
+                    não o estado atual. "Ativar modo claro" quando o tema é dark
+                    é mais informativo que "Tema: dark".
+                  </td>
+                </tr>
+                <tr>
+                  <td>{isDark ? &lt;Sun /&gt; : &lt;Moon /&gt;}</td>
+                  <td>
+                    O ícone reflete o que o clique vai fazer — Sol indica que
+                    clicar ativa o claro, Lua indica escuro.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- ─── 08 layout.tsx ─── -->
+        <section class="section" id="layout">
+          <div class="section-header">
+            <span class="section-num">08</span>
+            <h2>Integração no <code>layout.tsx</code></h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">src/app/layout.tsx</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="kw">import</span> { ThemeProvider } <span class="kw">from</span> <span class="str">'@/contexts/ThemeContext'</span>
+
+<span class="kw">export default function</span> <span class="fn">RootLayout</span>({ children }: { children: <span class="typ">React.ReactNode</span> }) {
+  <span class="kw">return</span> (
+    &lt;html lang=<span class="str">"pt-BR"</span> suppressHydrationWarning&gt;
+      &lt;body&gt;
+        &lt;<span class="fn">ThemeProvider</span>&gt;
+          {children}
+        &lt;/<span class="fn">ThemeProvider</span>&gt;
+      &lt;/body&gt;
+    &lt;/html&gt;
+  )
+}</code></pre>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Linha</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>suppressHydrationWarning</td>
+                  <td>
+                    Instrui o React a ignorar divergências de atributos no
+                    <code>&lt;html&gt;</code>. O <code>data-theme</code> gerado
+                    no servidor (<code>"light"</code>) diverge do valor lido do
+                    localStorage no cliente — esse atributo é o único ponto de
+                    divergência esperada.
+                  </td>
+                </tr>
+                <tr>
+                  <td>&lt;ThemeProvider&gt; envolvendo {children}</td>
+                  <td>
+                    Posiciona o Provider acima de toda a árvore. Qualquer
+                    componente em qualquer rota pode chamar
+                    <code>useTheme</code>.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="callout callout-info">
+            <span class="callout-icon">ℹ️</span>
+            <p>
+              <strong
+                ><code>suppressHydrationWarning</code> não é um hack.</strong
+              >
+              Age apenas no elemento <code>&lt;html&gt;</code> e em seus
+              atributos diretos. O <code>data-theme</code> vive exatamente ali.
+              O resto da árvore continua sendo verificado normalmente pelo
+              React.
+            </p>
+          </div>
+        </section>
+
+        <!-- ─── 09 @custom-variant ─── -->
+        <section class="section" id="variant">
+          <div class="section-header">
+            <span class="section-num">09</span>
+            <h2>A <code>@custom-variant</code> do Tailwind v4</h2>
+          </div>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">src/app/globals.css</span>
+              <button class="copy-btn" onclick="copyCode(this)">Copiar</button>
+            </div>
+            <pre><code><span class="kw">@import</span> <span class="str">"tailwindcss"</span>;
+
+<span class="kw">@custom-variant</span> dark (&amp;:where([data-theme=dark], [data-theme=dark] *));
+
+html {
+  transition: background-color 0.3s ease, color 0.3s ease;
+}</code></pre>
+          </div>
+
+          <p>
+            O Tailwind v4 por padrão detecta tema via classe
+            <code>.dark</code> no <code>&lt;html&gt;</code>. Essa linha
+            substitui esse comportamento por detecção via atributo
+            <code>data-theme</code>.
+          </p>
+
+          <p>
+            O seletor
+            <code>&amp;:where([data-theme=dark], [data-theme=dark] *)</code>
+            funciona assim:
+          </p>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Parte do seletor</th>
+                  <th>O que faz</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>[data-theme=dark]</td>
+                  <td>Aplica no próprio elemento que tem o atributo.</td>
+                </tr>
+                <tr>
+                  <td>[data-theme=dark] *</td>
+                  <td>Aplica em todos os descendentes desse elemento.</td>
+                </tr>
+                <tr>
+                  <td>:where(...)</td>
+                  <td>
+                    Usa especificidade zero, para não sobrescrever estilos com
+                    especificidade normal.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p>Com essa variant, <code>dark:bg-zinc-800</code> compila para:</p>
+
+          <div class="code-block">
+            <div class="code-header">
+              <span class="code-filename">CSS compilado</span>
+            </div>
+            <pre><code>:where([data-theme=dark], [data-theme=dark] *) .dark\:bg-zinc-800 {
+  background-color: rgb(39 39 42);
+}</code></pre>
+          </div>
+        </section>
+
+        <!-- ─── 10 Fluxo ─── -->
+        <section class="section" id="fluxo">
+          <div class="section-header">
+            <span class="section-num">10</span>
+            <h2>Fluxo completo da troca de tema</h2>
+          </div>
+
+          <h3>Ao clicar no botão</h3>
+          <div class="flow-block">
+            <span>Usuário clica no botão</span><br />
+            <span class="flow-arrow"> → </span>onClick dispara toggleTheme<br />
+            <span class="flow-arrow"> → </span>next = theme === 'light' ? 'dark'
+            : 'light'<br />
+            <span class="flow-arrow"> → </span>applyTheme(next)<br />
+            <span class="flow-arrow"> → </span
+            >document.documentElement.setAttribute('data-theme', next)
+            <span class="flow-note">← DOM atualiza</span><br />
+            <span class="flow-arrow"> → </span>localStorage.setItem('theme',
+            next) <span class="flow-note">← storage persiste</span><br />
+            <span class="flow-arrow"> → </span>setTheme(next)<br />
+            <span class="flow-arrow"> → </span>React agenda re-render<br />
+            <span class="flow-arrow"> → </span>ThemeToggle re-renderiza com
+            isDark atualizado<br />
+            <span class="flow-arrow"> → </span>ícone e label mudam<br />
+            <span class="flow-arrow"> → </span>CSS transition suaviza background
+            e color
+          </div>
+
+          <h3>Na próxima visita</h3>
+          <div class="flow-block">
+            <span>Browser carrega a página</span><br />
+            <span class="flow-arrow"> → </span>Next.js renderiza no servidor com
+            theme = 'light' (fallback)<br />
+            <span class="flow-arrow"> → </span>HTML chega ao browser com
+            data-theme="light"<br />
+            <span class="flow-arrow"> → </span>React hidrata<br />
+            <span class="flow-arrow"> → </span>ThemeProvider monta no cliente<br />
+            <span class="flow-arrow"> → </span>useState chama
+            resolveInitialTheme()<br />
+            <span class="flow-arrow"> → </span>localStorage.getItem('theme') →
+            'dark'<br />
+            <span class="flow-arrow"> → </span>applyTheme('dark')
+            <span class="flow-note">← data-theme="dark" aplicado</span><br />
+            <span class="flow-arrow"> → </span>suppressHydrationWarning ignora a
+            divergência no &lt;html&gt;
+          </div>
+        </section>
+
+        <!-- ─── Decisões ─── -->
+        <section class="section" id="decisoes">
+          <div class="section-header">
+            <span class="section-num">—</span>
+            <h2>Resumo das decisões de design</h2>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Decisão</th>
+                  <th>Justificativa</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>createContext&lt;T | null&gt;(null)</td>
+                  <td>
+                    O <code>null</code> inicial força o guard no
+                    <code>useTheme</code>. Sem ele, o TypeScript aceitaria
+                    <code>undefined</code> silenciosamente e os erros
+                    apareceriam em runtime, não em compilação.
+                  </td>
+                </tr>
+                <tr>
+                  <td>applyTheme fora do componente</td>
+                  <td>
+                    Função pura sem dependências de estado ou props. Declarar
+                    dentro do componente a recriaria a cada render sem
+                    necessidade.
+                  </td>
+                </tr>
+                <tr>
+                  <td>typeof window === 'undefined'</td>
+                  <td>
+                    Guard de ambiente que permite o Provider ser carregado sem
+                    lançar <code>ReferenceError</code> durante o SSR, mesmo com
+                    <code>'use client'</code>.
+                  </td>
+                </tr>
+                <tr>
+                  <td>useState(resolveInitialTheme) sem parênteses</td>
+                  <td>
+                    Inicializador lazy: o React chama a função uma vez na
+                    montagem. Com parênteses, executaria durante o render —
+                    antes do guard de ambiente ter efeito.
+                  </td>
+                </tr>
+                <tr>
+                  <td>applyTheme antes de setTheme</td>
+                  <td>
+                    Garante que o DOM mude sincronicamente antes do React
+                    agendar o re-render. Evita um frame com estado React novo e
+                    DOM antigo.
+                  </td>
+                </tr>
+                <tr>
+                  <td>suppressHydrationWarning no &lt;html&gt;</td>
+                  <td>
+                    Escopo preciso: age apenas no <code>&lt;html&gt;</code> e
+                    seus atributos diretos. O <code>data-theme</code> diverge
+                    deliberadamente entre servidor e cliente — não indica bug.
+                  </td>
+                </tr>
+                <tr>
+                  <td>Hook useTheme wrapper</td>
+                  <td>
+                    Transforma erro silencioso (contexto <code>null</code>) em
+                    mensagem clara. Elimina checagem manual de
+                    <code>null</code> em cada consumidor.
+                  </td>
+                </tr>
+                <tr>
+                  <td>@custom-variant dark com data-theme</td>
+                  <td>
+                    Controle programático via <code>setAttribute</code>. A
+                    variante padrão do Tailwind exige manipulação de
+                    <code>classList</code> — o atributo é mais direto e legível.
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <hr />
+
+        <!-- ─── Exercícios ─── -->
+        <section class="section" id="exercicios">
+          <div class="section-header">
+            <span class="section-num">Ex</span>
+            <h2>Exercícios</h2>
+          </div>
+
+          <p style="margin-bottom: 2rem">
+            Três exercícios em progressão deliberada. O básico é reprodução
+            dirigida da técnica. O médio exige extensão da implementação
+            existente com decisão estrutural. O avançado exige composição de
+            múltiplas técnicas com TypeScript genérico.
+          </p>
+
+          <!-- Ex 1 -->
+          <div class="exercise" id="ex1">
+            <div class="exercise-header">
+              <span class="exercise-level level-basico">Básico</span>
+              <span class="exercise-title">Exercício 1 — FontSizeContext</span>
+            </div>
+            <div class="exercise-body">
+              <p>
+                Crie um contexto <code>FontSizeContext</code> que disponibilize
+                três tamanhos de fonte: <code>'sm'</code>, <code>'md'</code> e
+                <code>'lg'</code>. Implemente um Provider com
+                <code>useState</code>, um hook <code>useFontSize</code> com
+                guard de <code>null</code>, e um componente
+                <code>FontSizeControl</code> com três botões que permitem ao
+                usuário trocar o tamanho.
+              </p>
+              <ul>
+                <li>
+                  Aplique o valor como atributo <code>data-font-size</code> no
+                  <code>document.documentElement</code>
+                </li>
+                <li>
+                  O hook deve lançar <code>Error</code> se usado fora do
+                  Provider
+                </li>
+                <li>
+                  Inclua a diretiva <code>'use client'</code> nos arquivos
+                  necessários
+                </li>
+              </ul>
+              <div class="acceptance">
+                <strong>Critério de aceitação:</strong> clicar em cada botão
+                altera o atributo no <code>&lt;html&gt;</code> sem erro de
+                TypeScript. O hook lança <code>Error</code> descritivo se usado
+                fora do Provider.
+              </div>
+
+              <button
+                class="solution-toggle"
+                onclick="toggleSolution(this)"
+                aria-expanded="false"
+              >
+                <em class="toggle-icon">▶</em>&nbsp; Ver solução
+              </button>
+              <div class="solution-panel">
+                <div class="solution-panel-header">
+                  Solução — FontSizeContext.tsx
+                </div>
+                <pre><code><span class="str">'use client'</span>
+
+<span class="kw">import</span> { createContext, useContext, useState } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">type</span> <span class="typ">FontSize</span> = <span class="str">'sm'</span> | <span class="str">'md'</span> | <span class="str">'lg'</span>
+
+<span class="kw">type</span> <span class="typ">FontSizeContextValue</span> = {
+  fontSize: <span class="typ">FontSize</span>
+  setFontSize: (size: <span class="typ">FontSize</span>) =&gt; <span class="kw">void</span>
+}
+
+<span class="kw">const</span> <span class="num">FontSizeContext</span> = <span class="fn">createContext</span>&lt;<span class="typ">FontSizeContextValue</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>)
+
+<span class="kw">const</span> <span class="fn">applyFontSize</span> = (size: <span class="typ">FontSize</span>): <span class="kw">void</span> =&gt; {
+  document.documentElement.<span class="fn">setAttribute</span>(<span class="str">'data-font-size'</span>, size)
+}
+
+<span class="kw">export const</span> <span class="fn">FontSizeProvider</span> = ({ children }: { children: <span class="typ">React.ReactNode</span> }) =&gt; {
+  <span class="kw">const</span> [fontSize, setFontSizeState] = <span class="fn">useState</span>&lt;<span class="typ">FontSize</span>&gt;(<span class="str">'md'</span>)
+
+  <span class="kw">const</span> <span class="fn">setFontSize</span> = (size: <span class="typ">FontSize</span>): <span class="kw">void</span> =&gt; {
+    <span class="fn">applyFontSize</span>(size)
+    <span class="fn">setFontSizeState</span>(size)
+  }
+
+  <span class="kw">return</span> (
+    &lt;<span class="fn">FontSizeContext</span> value={{ fontSize, setFontSize }}&gt;
+      {children}
+    &lt;/<span class="fn">FontSizeContext</span>&gt;
+  )
+}
+
+<span class="kw">export const</span> <span class="fn">useFontSize</span> = (): <span class="typ">FontSizeContextValue</span> =&gt; {
+  <span class="kw">const</span> ctx = <span class="fn">useContext</span>(FontSizeContext)
+  <span class="kw">if</span> (!ctx) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'useFontSize deve ser usado dentro de FontSizeProvider'</span>)
+  <span class="kw">return</span> ctx
+}
+
+<span class="cmt">// ─── FontSizeControl.tsx ────────────────────────────────</span>
+<span class="kw">export const</span> <span class="fn">FontSizeControl</span> = () =&gt; {
+  <span class="kw">const</span> { fontSize, setFontSize } = <span class="fn">useFontSize</span>()
+  <span class="kw">const</span> sizes: <span class="typ">FontSize</span>[] = [<span class="str">'sm'</span>, <span class="str">'md'</span>, <span class="str">'lg'</span>]
+
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"flex gap-2"</span>&gt;
+      {sizes.<span class="fn">map</span>(size =&gt; (
+        &lt;button
+          key={size}
+          onClick={() =&gt; <span class="fn">setFontSize</span>(size)}
+          aria-pressed={fontSize === size}
+        &gt;
+          {size.<span class="fn">toUpperCase</span>()}
+        &lt;/button&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ex 2 -->
+          <div class="exercise" id="ex2">
+            <div class="exercise-header">
+              <span class="exercise-level level-medio">Médio</span>
+              <span class="exercise-title"
+                >Exercício 2 — Tema com modo 'system'</span
+              >
+            </div>
+            <div class="exercise-body">
+              <p>
+                Estenda o <code>ThemeContext</code> existente para suportar um
+                terceiro tema: <code>'system'</code>. O tema
+                <code>'system'</code> não aplica nenhum
+                <code>data-theme</code> fixo — ele observa
+                <code>window.matchMedia('(prefers-color-scheme: dark)')</code> e
+                aplica <code>'dark'</code> ou <code>'light'</code> dinamicamente
+                conforme a preferência do sistema muda.
+              </p>
+              <ul>
+                <li>
+                  Implemente o listener com
+                  <code>addEventListener('change', ...)</code>
+                </li>
+                <li>
+                  Faça a limpeza com <code>removeEventListener</code> no cleanup
+                  do <code>useEffect</code>
+                </li>
+                <li>
+                  O <code>ThemeToggle</code> deve exibir um terceiro estado para
+                  o tema <code>'system'</code>
+                </li>
+                <li>
+                  O tipo <code>Theme</code> deve ser estendido para
+                  <code>'light' | 'dark' | 'system'</code>
+                </li>
+              </ul>
+              <div class="acceptance">
+                <strong>Critério de aceitação:</strong> com tema
+                <code>'system'</code> ativo, mudar a preferência do SO no painel
+                do Chrome DevTools (Rendering → Emulate CSS
+                prefers-color-scheme) reflete a mudança visual na aplicação sem
+                clique do usuário.
+              </div>
+
+              <button
+                class="solution-toggle"
+                onclick="toggleSolution(this)"
+                aria-expanded="false"
+              >
+                <em class="toggle-icon">▶</em>&nbsp; Ver solução
+              </button>
+              <div class="solution-panel">
+                <div class="solution-panel-header">
+                  Solução — ThemeContext com 'system'
+                </div>
+                <pre><code><span class="str">'use client'</span>
+
+<span class="kw">import</span> { createContext, useContext, useEffect, useState } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">type</span> <span class="typ">Theme</span> = <span class="str">'light'</span> | <span class="str">'dark'</span> | <span class="str">'system'</span>
+
+<span class="kw">type</span> <span class="typ">ThemeContextValue</span> = {
+  theme: <span class="typ">Theme</span>
+  setTheme: (t: <span class="typ">Theme</span>) =&gt; <span class="kw">void</span>
+}
+
+<span class="kw">const</span> <span class="num">ThemeContext</span> = <span class="fn">createContext</span>&lt;<span class="typ">ThemeContextValue</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>)
+
+<span class="kw">const</span> <span class="fn">applyResolved</span> = (resolved: <span class="str">'light'</span> | <span class="str">'dark'</span>): <span class="kw">void</span> =&gt; {
+  document.documentElement.<span class="fn">setAttribute</span>(<span class="str">'data-theme'</span>, resolved)
+}
+
+<span class="kw">export const</span> <span class="fn">ThemeProvider</span> = ({ children }: { children: <span class="typ">React.ReactNode</span> }) =&gt; {
+  <span class="kw">const</span> [theme, setThemeState] = <span class="fn">useState</span>&lt;<span class="typ">Theme</span>&gt;(() =&gt; {
+    <span class="kw">if</span> (<span class="kw">typeof</span> window === <span class="str">'undefined'</span>) <span class="kw">return</span> <span class="str">'light'</span>
+    <span class="kw">const</span> stored = localStorage.<span class="fn">getItem</span>(<span class="str">'theme'</span>)
+    <span class="kw">if</span> (stored === <span class="str">'light'</span> || stored === <span class="str">'dark'</span> || stored === <span class="str">'system'</span>) <span class="kw">return</span> stored
+    <span class="kw">return</span> <span class="str">'system'</span>
+  })
+
+  <span class="fn">useEffect</span>(() =&gt; {
+    <span class="kw">if</span> (theme !== <span class="str">'system'</span>) {
+      <span class="fn">applyResolved</span>(theme)
+      <span class="kw">return</span>
+    }
+
+    <span class="kw">const</span> mq = window.<span class="fn">matchMedia</span>(<span class="str">'(prefers-color-scheme: dark)'</span>)
+    <span class="fn">applyResolved</span>(mq.matches ? <span class="str">'dark'</span> : <span class="str">'light'</span>)
+
+    <span class="kw">const</span> <span class="fn">handler</span> = (e: <span class="typ">MediaQueryListEvent</span>) =&gt;
+      <span class="fn">applyResolved</span>(e.matches ? <span class="str">'dark'</span> : <span class="str">'light'</span>)
+
+    mq.<span class="fn">addEventListener</span>(<span class="str">'change'</span>, handler)
+    <span class="kw">return</span> () =&gt; mq.<span class="fn">removeEventListener</span>(<span class="str">'change'</span>, handler)
+  }, [theme])
+
+  <span class="kw">const</span> <span class="fn">setTheme</span> = (t: <span class="typ">Theme</span>): <span class="kw">void</span> =&gt; {
+    localStorage.<span class="fn">setItem</span>(<span class="str">'theme'</span>, t)
+    <span class="fn">setThemeState</span>(t)
+  }
+
+  <span class="kw">return</span> &lt;<span class="fn">ThemeContext</span> value={{ theme, setTheme }}&gt;{children}&lt;/<span class="fn">ThemeContext</span>&gt;
+}
+
+<span class="kw">export const</span> <span class="fn">useTheme</span> = (): <span class="typ">ThemeContextValue</span> =&gt; {
+  <span class="kw">const</span> ctx = <span class="fn">useContext</span>(ThemeContext)
+  <span class="kw">if</span> (!ctx) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'useTheme deve ser usado dentro de ThemeProvider'</span>)
+  <span class="kw">return</span> ctx
+}
+
+<span class="cmt">// ─── ThemeToggle com três estados ───────────────────────</span>
+<span class="kw">export const</span> <span class="fn">ThemeToggle</span> = () =&gt; {
+  <span class="kw">const</span> { theme, setTheme } = <span class="fn">useTheme</span>()
+  <span class="kw">const</span> options: { value: <span class="typ">Theme</span>; label: <span class="kw">string</span> }[] = [
+    { value: <span class="str">'light'</span>,  label: <span class="str">'☀️ Claro'</span>  },
+    { value: <span class="str">'dark'</span>,   label: <span class="str">'🌙 Escuro'</span> },
+    { value: <span class="str">'system'</span>, label: <span class="str">'💻 Sistema'</span> },
+  ]
+  <span class="kw">return</span> (
+    &lt;div className=<span class="str">"flex gap-1 rounded-lg border border-black/10 p-1"</span>&gt;
+      {options.<span class="fn">map</span>(opt =&gt; (
+        &lt;button
+          key={opt.value}
+          onClick={() =&gt; <span class="fn">setTheme</span>(opt.value)}
+          aria-pressed={theme === opt.value}
+          className={theme === opt.value ? <span class="str">'bg-white dark:bg-zinc-700'</span> : <span class="str">''</span>}
+        &gt;
+          {opt.label}
+        &lt;/button&gt;
+      ))}
+    &lt;/div&gt;
+  )
+}</code></pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Ex 3 -->
+          <div class="exercise" id="ex3">
+            <div class="exercise-header">
+              <span class="exercise-level level-avancado">Avançado</span>
+              <span class="exercise-title"
+                >Exercício 3 — UserPreferencesContext</span
+              >
+            </div>
+            <div class="exercise-body">
+              <p>
+                Implemente um <code>UserPreferencesContext</code> que gerencie
+                três preferências simultaneamente: <code>theme</code> (<code
+                  >'light' | 'dark'</code
+                >), <code>language</code> (<code>'pt-BR' | 'en'</code>) e
+                <code>reducedMotion</code> (<code>boolean</code>). O estado deve
+                ser persistido em <code>localStorage</code> como um único objeto
+                JSON.
+              </p>
+              <ul>
+                <li>
+                  O Provider deve ler, validar e restaurar o objeto na montagem
+                  — com fallback se o JSON estiver malformado ou ausente
+                </li>
+                <li>
+                  Crie um hook <code>useUserPreferences</code> que exponha o
+                  estado completo e uma função genérica:
+                  <code
+                    >updatePreference&lt;K extends keyof Preferences&gt;(key: K,
+                    value: Preferences[K]): void</code
+                  >
+                </li>
+                <li>
+                  Aplique <code>reducedMotion</code> como atributo
+                  <code>data-reduced-motion</code> no <code>&lt;html&gt;</code>
+                </li>
+                <li>
+                  No <code>globals.css</code>:
+                  <code
+                    >[data-reduced-motion=true] * &#123; transition: none
+                    !important &#125;</code
+                  >
+                </li>
+              </ul>
+              <div class="acceptance">
+                <strong>Critério de aceitação:</strong>
+                <code>updatePreference('theme', 'dark')</code> não sobrescreve
+                <code>language</code> ou <code>reducedMotion</code> no storage.
+                O TypeScript rejeita em compilação chamadas com chave
+                inexistente ou valor incompatível com a chave.
+              </div>
+
+              <button
+                class="solution-toggle"
+                onclick="toggleSolution(this)"
+                aria-expanded="false"
+              >
+                <em class="toggle-icon">▶</em>&nbsp; Ver solução
+              </button>
+              <div class="solution-panel">
+                <div class="solution-panel-header">
+                  Solução — UserPreferencesContext.tsx
+                </div>
+                <pre><code><span class="str">'use client'</span>
+
+<span class="kw">import</span> { createContext, useContext, useState } <span class="kw">from</span> <span class="str">'react'</span>
+
+<span class="kw">type</span> <span class="typ">Preferences</span> = {
+  theme:        <span class="str">'light'</span> | <span class="str">'dark'</span>
+  language:     <span class="str">'pt-BR'</span> | <span class="str">'en'</span>
+  reducedMotion: <span class="kw">boolean</span>
+}
+
+<span class="kw">type</span> <span class="typ">PreferencesContextValue</span> = {
+  preferences: <span class="typ">Preferences</span>
+  updatePreference: &lt;K <span class="kw">extends keyof</span> <span class="typ">Preferences</span>&gt;(key: K, value: <span class="typ">Preferences</span>[K]) =&gt; <span class="kw">void</span>
+}
+
+<span class="kw">const</span> <span class="num">DEFAULTS</span>: <span class="typ">Preferences</span> = {
+  theme:         <span class="str">'light'</span>,
+  language:      <span class="str">'pt-BR'</span>,
+  reducedMotion: <span class="kw">false</span>,
+}
+
+<span class="kw">const</span> <span class="num">STORAGE_KEY</span> = <span class="str">'user-preferences'</span>
+
+<span class="kw">const</span> <span class="fn">loadPreferences</span> = (): <span class="typ">Preferences</span> =&gt; {
+  <span class="kw">if</span> (<span class="kw">typeof</span> window === <span class="str">'undefined'</span>) <span class="kw">return</span> { ...<span class="num">DEFAULTS</span> }
+  <span class="kw">try</span> {
+    <span class="kw">const</span> raw = localStorage.<span class="fn">getItem</span>(<span class="num">STORAGE_KEY</span>)
+    <span class="kw">if</span> (!raw) <span class="kw">return</span> { ...<span class="num">DEFAULTS</span> }
+    <span class="kw">const</span> parsed = <span class="fn">JSON.parse</span>(raw) <span class="kw">as</span> <span class="typ">Partial</span>&lt;<span class="typ">Preferences</span>&gt;
+    <span class="kw">return</span> { ...<span class="num">DEFAULTS</span>, ...parsed }
+  } <span class="kw">catch</span> {
+    <span class="kw">return</span> { ...<span class="num">DEFAULTS</span> }
+  }
+}
+
+<span class="kw">const</span> <span class="fn">applyPreferences</span> = (prefs: <span class="typ">Preferences</span>): <span class="kw">void</span> =&gt; {
+  <span class="kw">const</span> root = document.documentElement
+  root.<span class="fn">setAttribute</span>(<span class="str">'data-theme'</span>, prefs.theme)
+  root.<span class="fn">setAttribute</span>(<span class="str">'data-reduced-motion'</span>, <span class="typ">String</span>(prefs.reducedMotion))
+  localStorage.<span class="fn">setItem</span>(<span class="num">STORAGE_KEY</span>, <span class="fn">JSON.stringify</span>(prefs))
+}
+
+<span class="kw">const</span> <span class="num">PreferencesContext</span> = <span class="fn">createContext</span>&lt;<span class="typ">PreferencesContextValue</span> | <span class="kw">null</span>&gt;(<span class="kw">null</span>)
+
+<span class="kw">export const</span> <span class="fn">UserPreferencesProvider</span> = ({ children }: { children: <span class="typ">React.ReactNode</span> }) =&gt; {
+  <span class="kw">const</span> [preferences, setPreferences] = <span class="fn">useState</span>&lt;<span class="typ">Preferences</span>&gt;(loadPreferences)
+
+  <span class="kw">const</span> updatePreference = &lt;K <span class="kw">extends keyof</span> <span class="typ">Preferences</span>&gt;(
+    key: K,
+    value: <span class="typ">Preferences</span>[K]
+  ): <span class="kw">void</span> =&gt; {
+    <span class="kw">const</span> next = { ...preferences, [key]: value }
+    <span class="fn">applyPreferences</span>(next)
+    <span class="fn">setPreferences</span>(next)
+  }
+
+  <span class="kw">return</span> (
+    &lt;<span class="num">PreferencesContext</span> value={{ preferences, updatePreference }}&gt;
+      {children}
+    &lt;/<span class="num">PreferencesContext</span>&gt;
+  )
+}
+
+<span class="kw">export const</span> <span class="fn">useUserPreferences</span> = (): <span class="typ">PreferencesContextValue</span> =&gt; {
+  <span class="kw">const</span> ctx = <span class="fn">useContext</span>(PreferencesContext)
+  <span class="kw">if</span> (!ctx) <span class="kw">throw new</span> <span class="fn">Error</span>(<span class="str">'useUserPreferences fora do UserPreferencesProvider'</span>)
+  <span class="kw">return</span> ctx
+}
+
+<span class="cmt">// ─── globals.css ────────────────────────────────────────</span>
+<span class="cmt">// [data-reduced-motion=true] * { transition: none !important }</span></code></pre>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ─── Footer nav ─── -->
+        <nav class="page-nav">
+          <a href="index.html">← Início</a>
+        </nav>
+      </main>
+    </div>
+
+    <script>
+      /* ─── Copy button ─────────────────────────────────────────── */
+      function copyCode(btn) {
+        const pre = btn.closest(".code-block").querySelector("pre");
+        const text = pre.innerText;
+        navigator.clipboard.writeText(text).then(() => {
+          btn.textContent = "Copiado!";
+          btn.classList.add("copied");
+          setTimeout(() => {
+            btn.textContent = "Copiar";
+            btn.classList.remove("copied");
+          }, 2000);
+        });
+      }
+
+      /* ─── Solution toggle ─────────────────────────────────────── */
+      function toggleSolution(btn) {
+        const panel = btn.nextElementSibling;
+        const isOpen = panel.classList.contains("open");
+        panel.classList.toggle("open", !isOpen);
+        btn.setAttribute("aria-expanded", String(!isOpen));
+      }
+
+      /* ─── Active sidebar link on scroll ──────────────────────── */
+      const sections = document.querySelectorAll(".section[id]");
+      const navLinks = document.querySelectorAll(".sidebar-nav a");
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              navLinks.forEach((link) => {
+                link.style.color = "";
+                link.style.background = "";
+              });
+              const active = document.querySelector(
+                `.sidebar-nav a[href="#${entry.target.id}"]`,
+              );
+              if (active) {
+                active.style.color = "var(--accent)";
+                active.style.background = "rgba(88,166,255,.07)";
+              }
+            }
+          });
+        },
+        { rootMargin: "-20% 0px -70% 0px" },
+      );
+
+      sections.forEach((s) => observer.observe(s));
+    </script>
+  </body>
+</html>

@@ -1,0 +1,93 @@
+.wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 3.2rem;
+  font-family: "DM Mono", "Courier New", monospace;
+}
+
+/* Caixa do semáforo */
+.housing {
+  background: #1c2333;
+  border: 2px solid #30363d;
+  border-radius: 1.2rem;
+  padding: 2rem;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  box-shadow:
+    0 4px 24px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* Bolha base — estado apagado */
+.bulb {
+  width: 6rem;
+  height: 6rem;
+  border-radius: 50%;
+  background: #2d3748;
+  transition:
+    background 0.3s ease,
+    box-shadow 0.3s ease;
+}
+
+/* Cores base para a bolha apagada — feedback sutil de identidade */
+.red {
+  background: #3d2d2d;
+}
+.yellow {
+  background: #3d3820;
+}
+.green {
+  background: #1f3530;
+}
+
+/* Estado ativo — cada cor com seu glow próprio */
+.red.active {
+  background: #f87171;
+  box-shadow: 0 0 2rem rgba(248, 113, 113, 0.6);
+}
+
+.yellow.active {
+  background: #fbbf24;
+  box-shadow: 0 0 2rem rgba(251, 191, 36, 0.6);
+}
+
+.green.active {
+  background: #34d399;
+  box-shadow: 0 0 2rem rgba(52, 211, 153, 0.6);
+}
+
+/* Mensagem de estado */
+.message {
+  font-size: 1.2rem;
+  color: #e2e8f0;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+/* Botão manual */
+.button {
+  background: transparent;
+  border: 1px solid #30363d;
+  border-radius: 0.6rem;
+  color: #718096;
+  font-family: inherit;
+  font-size: 0.9rem;
+  padding: 0.6rem 1.4rem;
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
+  letter-spacing: 0.04em;
+}
+
+.button:hover {
+  border-color: #4a5568;
+  color: #a0aec0;
+}
+
+.button:active {
+  background: rgba(255, 255, 255, 0.03);
+}

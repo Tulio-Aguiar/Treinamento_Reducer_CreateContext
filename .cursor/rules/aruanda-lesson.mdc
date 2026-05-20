@@ -1,0 +1,66 @@
+---
+description: Ativa quando o usuário digita @aruanda-lesson seguido do nome de um componente. Lê o LESSON_CONTEXT.md correspondente e produz o LESSON.md no padrão Aula-Modelo do Protocolo Aruanda.
+globs:
+alwaysApply: false
+---
+
+# aruanda-lesson — Produtor de Aulas do Protocolo Aruanda
+
+## Quando esta rule é ativada
+
+Sempre que o usuário digitar `@aruanda-lesson <NomeDoComponente>` no chat do Cursor.
+
+Exemplos de invocação:
+
+- `@aruanda-lesson Anatomia`
+- `@aruanda-lesson AdvancedCounter`
+- `@aruanda-lesson useTaskContext`
+
+## O que fazer
+
+**Passo 1 — Derivar os nomes dos arquivos**
+
+A partir do nome recebido (`<NomeDoComponente>`), construir:
+
+- Arquivo de entrada: `<NomeDoComponente>-LESSON_CONTEXT.md`
+- Arquivo de saída: `<NomeDoComponente>-LESSON.md`
+
+Exemplos:
+
+- `Anatomia` → entrada: `Anatomia-LESSON_CONTEXT.md` · saída: `Anatomia-LESSON.md`
+- `AdvancedCounter` → entrada: `AdvancedCounter-LESSON_CONTEXT.md` · saída: `AdvancedCounter-LESSON.md`
+
+**Passo 2 — Localizar o arquivo de entrada**
+
+Buscar `<NomeDoComponente>-LESSON_CONTEXT.md` no projeto aberto, priorizando `src/` e subpastas. Se não encontrar, informar ao usuário com o caminho esperado e encerrar.
+
+**Passo 3 — Ler e processar**
+
+Ler o conteúdo completo do `LESSON_CONTEXT.md` localizado. O arquivo tem três seções:
+
+- **SEÇÃO 1** — código-fonte do componente
+- **SEÇÃO 2** — metadados, padrões detectados, partes obrigatórias e opcionais
+- **SEÇÃO 3** — instrução de produção + Aula-Modelo completa como padrão de referência
+
+**Passo 4 — Produzir o LESSON.md**
+
+Produzir `<NomeDoComponente>-LESSON.md` na mesma pasta onde o `LESSON_CONTEXT.md` foi encontrado, seguindo integralmente as instruções da SEÇÃO 3 do arquivo de entrada.
+
+Regras de produção (extraídas da SEÇÃO 3):
+
+1. Partes marcadas como obrigatórias na SEÇÃO 2 aparecem no LESSON.md sem exceção
+2. Partes opcionais são incluídas apenas se o código da SEÇÃO 1 tiver material suficiente — sem seções vazias ou conteúdo inventado
+3. A complexidade inferida calibra a profundidade de cada seção
+4. Todo código citado vem do arquivo da SEÇÃO 1 — sem inventar código externo
+5. Bugs e armadilhas detectados na SEÇÃO 2 aparecem com marcação ❌ / ✅
+6. O LESSON.md é autocontido — não referencia o LESSON_CONTEXT.md nem o aruanda-teach
+
+**Passo 5 — Confirmar**
+
+Após gravar o arquivo, informar ao usuário:
+
+- Caminho completo do `LESSON.md` gerado
+- Partes incluídas (obrigatórias + opcionais que tiveram material)
+- Partes omitidas (opcionais sem material suficiente), se houver
+
+**Idioma de produção:** o LESSON.md deve ser escrito integralmente em português brasileiro, independente do idioma do sistema ou do agente.

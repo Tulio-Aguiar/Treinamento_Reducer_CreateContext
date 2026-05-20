@@ -7,40 +7,38 @@ const translations = {
     hello: "Olá",
     logout: "Sair",
     welcome: "Bem-vindo",
-    access: "ao acesso",
+    acess: "ao acesso",
   },
   "en-US": {
     hello: "Hello",
     logout: "Sign out",
     welcome: "Welcome",
-    access: "to access",
+    acess: "to access",
   },
   "de-DE": {
     hello: "Hallo",
     logout: "Abmelden",
     welcome: "Willkommen",
-    access: "zum Zugang",
+    acess: "zum Zugang",
   },
 };
 
-type TransaltionsKeys = keyof (typeof translations)["pt-BR"];
+type TranslationsKeys = keyof (typeof translations)["pt-BR"];
 
 interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
-  t: (key: TransaltionsKeys) => string;
+  t: (key: TranslationsKeys) => string;
 }
 
+interface LanguageProviderProps {
+  children: React.ReactNode;
+}
 const LanguageContext = createContext<LanguageContextType | null>(null);
 
-export default function LanguageProvider({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+export default function LanguageProvider({ children }: LanguageProviderProps) {
   const [language, setLanguage] = useState<Language>("pt-BR");
-
-  const t = (key: TransaltionsKeys): string => {
+  const t = (key: TranslationsKeys): string => {
     return translations[language][key];
   };
   const value = {

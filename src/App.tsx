@@ -1,5 +1,4 @@
-import Header from "./components/Header/Header";
-import { UserMenu } from "./components/UserMenu/UserMenu";
+import { StoreDashboard } from "./components/exercicios-Reducer/StoreDashboard";
 import { useTheme } from "./ThemeContext";
 
 function App() {
@@ -19,8 +18,7 @@ function App() {
           gap: "20px",
         }}
       >
-        <Header />
-        <UserMenu />
+        <StoreDashboard />
       </div>
     </>
   );

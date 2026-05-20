@@ -1,7 +1,9 @@
 import { createContext, useContext, useState } from "react";
 
+type Theme = "light" | "dark";
+
 interface ThemeContextType {
-  theme: "light" | "dark";
+  theme: Theme;
   toggleTheme: () => void;
 }
 
@@ -11,7 +13,7 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
+export default function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<"light" | "dark">("dark");
   const toggleTheme = () => {
     setTheme((prev) => (prev === "dark" ? "light" : "dark"));
@@ -20,7 +22,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     theme,
     toggleTheme,
   };
-
   return <ThemeContext value={value}>{children}</ThemeContext>;
 }
 
@@ -28,7 +29,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 export function useTheme(): ThemeContextType {
   const context = useContext(ThemeContext);
   if (context === null) {
-    throw new Error("useTheme deve ser usado dentro de um provider");
+    throw new Error("ThemeContext fora do ThemeProvider");
   }
   return context;
 }

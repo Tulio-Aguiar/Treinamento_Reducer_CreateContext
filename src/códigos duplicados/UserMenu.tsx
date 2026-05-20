@@ -1,0 +1,70 @@
+import {
+  useLanguage,
+  type Language,
+} from "../components/LanguageContext/LanguageContext";
+import { useAuth } from "./AuthContext";
+import { useTheme } from "../ThemeContext";
+
+export function UserMenu() {
+  const { user, isAuthenticated, login, logout } = useAuth();
+  const { t, language, setLanguage } = useLanguage();
+  const { theme } = useTheme();
+
+  const buttonStyle = {
+    backgroundColor: theme === "dark" ? "#fff" : "#000",
+    color: theme === "dark" ? "#000" : "#fff",
+    border: "none",
+    padding: "10px 16px",
+    borderRadius: "5px",
+    fontSize: "16px",
+  };
+
+  if (!isAuthenticated) {
+    return (
+      <button onClick={() => login("tulio@dev.com", "123")} style={buttonStyle}>
+        Entrar{""}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      style={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        gap: "10px",
+        marginTop: "20px",
+        padding: "10px",
+      }}
+    >
+      <span>
+        {t("hello")}, {user?.name}! {""}
+      </span>
+      <span>
+        {t("welcome")} {t("access")} {user?.role}
+      </span>
+
+      <select
+        value={language}
+        onChange={(e) => setLanguage(e.target.value as Language)}
+        style={{
+          ...buttonStyle,
+          padding: "5px 10px",
+          borderRadius: "5px",
+          cursor: "pointer",
+          fontSize: "14px",
+        }}
+      >
+        <option value="pt-BR">PT</option>
+        <option value="en-US">EN</option>
+        <option value="de-DE">DE</option>
+      </select>
+
+      <button onClick={logout} style={buttonStyle}>
+        {t("logout")}
+      </button>
+    </div>
+  );
+}

@@ -51,7 +51,7 @@ export default function AuthProvider({
     logout,
   };
 
-  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+  return <AuthContext value={value}>{children}</AuthContext>;
 }
 
 // ─── Hook público ────────────────────────────────────────

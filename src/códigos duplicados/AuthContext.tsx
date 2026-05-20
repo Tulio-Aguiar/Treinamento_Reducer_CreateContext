@@ -1,10 +1,10 @@
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext, useCallback, useState } from "react";
 
 interface User {
   id: string;
   name: string;
   email: string;
-  role: "user" | "admin";
+  role: "admin" | "user";
 }
 
 interface AuthContextType {
@@ -22,6 +22,7 @@ interface AuthProviderProps {
 
 export default function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<User | null>(null);
+
   const login = useCallback(async (email: string, _password: string) => {
     const mockUser: User = {
       id: "1",
@@ -31,23 +32,26 @@ export default function AuthProvider({ children }: AuthProviderProps) {
     };
     setUser(mockUser);
   }, []);
+
   const logout = useCallback(() => {
     setUser(null);
   }, []);
+
   const value: AuthContextType = {
     user,
-    isAuthenticated: user != null,
+    isAuthenticated: user !== null,
     login,
     logout,
   };
-  return <AuthContext value={value}>{children}</AuthContext>;
+
+  return (
+    <AuthContext.Provider value={value}>{children}</AuthContext.Provider>
+  );
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function useAuth(): AuthContextType {
   const ctx = useContext(AuthContext);
-  if (!ctx) {
-    throw new Error("useAuth fora do AuthProvider");
-  }
+  if (ctx === null) throw new Error("useAuth fora do AuthProvider");
   return ctx;
 }
